@@ -28,7 +28,6 @@ class NovaExtension {
       'laravel-nova': path.join(__dirname, 'vendor/laravel/nova/resources/js/mixins/packages.js'),
       'laravel-nova-mixins': path.join(__dirname, 'vendor/laravel/nova/resources/js/mixins/index.js'),
       '@': path.join(__dirname, 'vendor/laravel/nova/resources/js/'),
-      // '@/util': path.join(__dirname, 'vendor/laravel/nova/resources/js/util/index.js'),
     };
     webpackConfig.output = {
       uniqueName: this.name,
