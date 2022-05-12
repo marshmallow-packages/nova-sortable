@@ -1,33 +1,32 @@
 <template>
   <div class="flex items-center">
-    <slot name="checkbox" />
-
+    <slot></slot>
     <div class="flex items-center ml-4" v-tooltip="reorderDisabledTooltip" v-if="canSeeReorderButtons">
       <div class="flex flex-col">
-        <chevron-up-icon
+        <ChevronUpIcon
           @click="!reorderDisabled && $emit('moveToStart')"
           :custom-class="{
-            'cursor-pointer text-70 hover:text-80': !reorderDisabled,
-            'cursor-default text-50': reorderDisabled,
+            'cursor-pointer text-gray-400 hover:text-primary-400 active:text-primary-500': !reorderDisabled,
+            'cursor-default text-gray-200': reorderDisabled,
           }"
           v-tooltip="moveToStartTooltip"
         />
 
-        <chevron-down-icon
+        <ChevronDownIcon
           @click="!reorderDisabled && $emit('moveToEnd')"
           :custom-class="{
-            'cursor-pointer text-70 hover:text-80': !reorderDisabled,
-            'cursor-default text-50': reorderDisabled,
+            'cursor-pointer text-gray-400 hover:text-primary-400  active:text-primary-500': !reorderDisabled,
+            'cursor-default text-gray-200': reorderDisabled,
           }"
           v-tooltip="moveToEndTooltip"
         />
       </div>
 
-      <burger-icon
-        style="min-width: 22px; width: 32px"
+      <BurgerIcon
+        style="min-width: 22px; width: 22px"
         :custom-class="{
-          'handle cursor-move text-70 hover:text-80': !reorderDisabled,
-          'text-50 cursor-default': reorderDisabled,
+          'handle cursor-move text-gray-400 hover:text-primary-400 active:text-primary-500': !reorderDisabled,
+          'text-gray-200 cursor-default': reorderDisabled,
         }"
       />
     </div>
@@ -38,16 +37,17 @@
 import ChevronUpIcon from '../icons/ChevronUpIcon';
 import ChevronDownIcon from '../icons/ChevronDownIcon';
 import BurgerIcon from '../icons/BurgerIcon';
-import { canSortResource } from '../tool';
+import { canSortResource } from '../mixins/canSortResource';
+import { InteractsWithQueryString } from 'laravel-nova-mixins';
 
 export default {
   components: { ChevronUpIcon, ChevronDownIcon, BurgerIcon },
-  props: ['resource', 'viaResourceId', 'relationshipType', 'viaRelationship', 'resourceName'],
-  computed: {
-    tooltipClasses() {
-      return ['bg-white', 'px-3', 'py-2', 'rounded', 'border', 'border-50', 'shadow', 'text-sm', 'leading-normal'];
-    },
 
+  // mixins: { InteractsWithQueryString },
+
+  props: ['resource', 'viaResourceId', 'relationshipType', 'viaRelationship', 'resourceName'],
+
+  computed: {
     canSeeReorderButtons() {
       return canSortResource(this.resource, this.relationshipType);
     },
@@ -58,9 +58,9 @@ export default {
         return 'notAllowed';
       }
 
-      if (!!this.$route.query[this.orderByParameter]) {
-        return 'activeSort';
-      }
+      // if (!!this.resourceRequestQueryString[this.orderByParameter]) {
+      //   return 'activeSort';
+      // }
 
       return false;
     },
@@ -70,34 +70,15 @@ export default {
     },
 
     reorderDisabledTooltip() {
-      return this.reorderDisabled
-        ? {
-            content: this.__(`novaSortable.reorderingDisabledTooltip.${this.reorderDisabled}`),
-            classes: this.tooltipClasses,
-            offset: 5,
-            boundariesElement: document,
-          }
-        : void 0;
+      return this.reorderDisabled ? this.__(`novaSortable.reorderingDisabledTooltip.${this.reorderDisabled}`) : void 0;
     },
 
     moveToStartTooltip() {
-      return !this.reorderDisabled
-        ? {
-            content: this.__('novaSortable.moveToStart'),
-            classes: this.tooltipClasses,
-            offset: 5,
-          }
-        : void 0;
+      return !this.reorderDisabled ? this.__('novaSortable.moveToStart') : void 0;
     },
 
     moveToEndTooltip() {
-      return !this.reorderDisabled
-        ? {
-            content: this.__('novaSortable.moveToEnd'),
-            classes: this.tooltipClasses,
-            offset: 5,
-          }
-        : void 0;
+      return !this.reorderDisabled ? this.__('novaSortable.moveToEnd') : void 0;
     },
   },
 };
