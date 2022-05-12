@@ -1,5 +1,7 @@
 # Nova Sortable
 
+**This is a fork from the original package of [outl1ne/nova-sortable](https://github.com/outl1ne/nova-sortable)**
+
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/marshmallow/nova-sortable.svg?style=flat-square)](https://packagist.org/packages/marshmallow/nova-sortable)
 [![Total Downloads](https://img.shields.io/packagist/dt/marshmallow/nova-sortable.svg?style=flat-square)](https://packagist.org/packages/marshmallow/nova-sortable)
 
