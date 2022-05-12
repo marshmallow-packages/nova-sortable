@@ -38,16 +38,18 @@ import ChevronUpIcon from '../icons/ChevronUpIcon';
 import ChevronDownIcon from '../icons/ChevronDownIcon';
 import BurgerIcon from '../icons/BurgerIcon';
 import { canSortResource } from '../mixins/canSortResource';
-import { InteractsWithQueryString } from 'laravel-nova-mixins';
 
 export default {
   components: { ChevronUpIcon, ChevronDownIcon, BurgerIcon },
 
-  // mixins: { InteractsWithQueryString },
-
   props: ['resource', 'viaResourceId', 'relationshipType', 'viaRelationship', 'resourceName'],
 
   computed: {
+    routeParameters() {
+      const searchParams = new URLSearchParams(window.location.search);
+      return Object.fromEntries(searchParams.entries());
+    },
+
     canSeeReorderButtons() {
       return canSortResource(this.resource, this.relationshipType);
     },
@@ -58,9 +60,9 @@ export default {
         return 'notAllowed';
       }
 
-      // if (!!this.resourceRequestQueryString[this.orderByParameter]) {
-      //   return 'activeSort';
-      // }
+      if (!!this.routeParameters[this.orderByParameter]) {
+        return 'activeSort';
+      }
 
       return false;
     },
