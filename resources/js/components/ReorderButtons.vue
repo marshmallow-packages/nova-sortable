@@ -45,11 +45,6 @@ export default {
   props: ['resource', 'viaResourceId', 'relationshipType', 'viaRelationship', 'resourceName'],
 
   computed: {
-    routeParameters() {
-      const searchParams = new URLSearchParams(window.location.search);
-      return Object.fromEntries(searchParams.entries());
-    },
-
     canSeeReorderButtons() {
       return canSortResource(this.resource, this.relationshipType);
     },
@@ -60,25 +55,87 @@ export default {
         return 'notAllowed';
       }
 
-      if (!!this.routeParameters[this.orderByParameter]) {
+      if (this.hasDirection || this.isSorted) {
         return 'activeSort';
       }
 
       return false;
     },
 
-    orderByParameter() {
-      return this.viaRelationship ? this.viaRelationship + '_order' : this.resourceName + '_order';
+    /**
+     * The current route parameters
+     */
+    routeParameters() {
+      const searchParams = new URLSearchParams(window.location.search);
+      return Object.fromEntries(searchParams.entries());
     },
 
+    /**
+     * The name of the sortable resource
+     */
+    resourceKey() {
+      return this.viaRelationship ? this.viaRelationship : this.resourceName;
+    },
+
+    /**
+     * The order query parameter for the sortable resource
+     */
+    sortKey() {
+      return `${this.resourceKey}_order`;
+    },
+
+    /**
+     * The current order query parameter value
+     */
+    sortColumn() {
+      return this.routeParameters[this.sortKey];
+    },
+
+    /**
+     * The direction query parameter for the sortable resource
+     */
+    directionKey() {
+      return `${this.resourceKey}_direction`;
+    },
+
+    /**
+     * The current direction query parameter value
+     */
+    direction() {
+      return this.routeParameters[this.directionKey];
+    },
+
+    /**
+     * Check if there is a current direction
+     */
+    hasDirection() {
+      return ['asc', 'desc'].includes(this.direction);
+    },
+
+    /**
+     * Check if there is a current direction
+     */
+    isSorted() {
+      return !!this.routeParameters[this.sortKey];
+    },
+
+    /**
+     * The content of the reorderDisabledTooltip
+     */
     reorderDisabledTooltip() {
       return this.reorderDisabled ? this.__(`novaSortable.reorderingDisabledTooltip.${this.reorderDisabled}`) : void 0;
     },
 
+    /**
+     * The content of the moveToStartTooltip
+     */
     moveToStartTooltip() {
       return !this.reorderDisabled ? this.__('novaSortable.moveToStart') : void 0;
     },
 
+    /**
+     * The content of the moveToEndTooltip
+     */
     moveToEndTooltip() {
       return !this.reorderDisabled ? this.__('novaSortable.moveToEnd') : void 0;
     },
