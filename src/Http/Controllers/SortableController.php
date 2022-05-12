@@ -1,10 +1,10 @@
 <?php
 
-namespace OptimistDigital\NovaSortable\Http\Controllers;
+namespace Marshmallow\NovaSortable\Http\Controllers;
 
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Nova;
-use OptimistDigital\NovaSortable\Traits\HasSortableRows;
+use Marshmallow\NovaSortable\Traits\HasSortableRows;
 
 class SortableController
 {

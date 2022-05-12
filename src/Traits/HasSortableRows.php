@@ -1,6 +1,6 @@
 <?php
 
-namespace OptimistDigital\NovaSortable\Traits;
+namespace Marshmallow\NovaSortable\Traits;
 
 use Spatie\EloquentSortable\SortableTrait;
 use Laravel\Nova\Http\Requests\LensRequest;

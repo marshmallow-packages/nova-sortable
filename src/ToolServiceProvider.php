@@ -1,6 +1,6 @@
 <?php
 
-namespace OptimistDigital\NovaSortable;
+namespace Marshmallow\NovaSortable;
 
 use Laravel\Nova\Nova;
 use Laravel\Nova\Events\ServingNova;
@@ -37,7 +37,7 @@ class ToolServiceProvider extends ServiceProvider
         Route::middleware(['nova'])
             ->prefix('nova-vendor/nova-sortable')
             ->domain(config('nova.domain', null))
-            ->namespace('\OptimistDigital\NovaSortable\Http\Controllers')
+            ->namespace('\Marshmallow\NovaSortable\Http\Controllers')
             ->group(__DIR__ . '/../routes/api.php');
     }
 }
