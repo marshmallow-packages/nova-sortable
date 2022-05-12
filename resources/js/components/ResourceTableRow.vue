@@ -93,7 +93,7 @@
             :data-testid="`${testId}-view-button`"
             :dusk="`${resource['id'].value}-view-button`"
             :href="$url(`/resources/${resourceName}/${resource['id'].value}`)"
-            class="toolbar-button px-2"
+            class="toolbar-button hover:text-primary-500 px-2"
             @click.stop
           >
             <Icon type="eye" />
@@ -113,7 +113,7 @@
                 viaPivotId: resource['id'].pivotValue,
               })
             "
-            class="toolbar-button"
+            class="toolbar-button hover:text-primary-500"
             @click.stop
           >
             <Icon type="pencil-alt" />
@@ -132,7 +132,7 @@
                 viaRelationship: viaRelationship,
               })
             "
-            class="toolbar-button px-2"
+            class="toolbar-button hover:text-primary-500 px-2"
             @click.stop
           >
             <Icon type="pencil-alt" />
@@ -146,7 +146,7 @@
           :aria-label="__(viaManyToMany ? 'Detach' : 'Delete')"
           :data-testid="`${testId}-delete-button`"
           :dusk="`${resource['id'].value}-delete-button`"
-          class="toolbar-button px-2"
+          class="toolbar-button hover:text-primary-500 px-2"
           @click.stop="openDeleteModal"
         >
           <Icon type="trash" />
@@ -158,7 +158,7 @@
           v-tooltip.click="__('Restore')"
           :aria-label="__('Restore')"
           :dusk="`${resource['id'].value}-restore-button`"
-          class="toolbar-button px-2"
+          class="toolbar-button hover:text-primary-500 px-2"
           @click.stop="openRestoreModal"
         >
           <Icon type="refresh" />
