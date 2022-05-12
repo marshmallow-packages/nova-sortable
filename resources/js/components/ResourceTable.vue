@@ -46,6 +46,8 @@
           :should-show-column-borders="shouldShowColumnBorders"
           :table-style="tableStyle"
           :update-selection-status="updateSelectionStatus"
+          @moveToStart="moveToStart(resource)"
+          @moveToEnd="moveToEnd(resource)"
         />
       </draggable>
     </table>
