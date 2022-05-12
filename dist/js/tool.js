@@ -38371,7 +38371,8 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     onResetOrderBy: $options.resetOrderBy
   }, null, 8
   /* PROPS */
-  , ["resource-name", "fields", "should-show-column-borders", "should-show-checkboxes", "sortable", "onOrder", "onResetOrderBy"]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("tbody", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_draggable, {
+  , ["resource-name", "fields", "should-show-column-borders", "should-show-checkboxes", "sortable", "onOrder", "onResetOrderBy"]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_draggable, {
+    tag: "tbody",
     "item-key": "id",
     modelValue: _ctx.fakeResources,
     "onUpdate:modelValue": _cache[1] || (_cache[1] = function ($event) {
@@ -38417,7 +38418,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
 
   }, 8
   /* PROPS */
-  , ["modelValue", "onUpdate"])])], 2
+  , ["modelValue", "onUpdate"])], 2
   /* CLASS */
   )) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)]);
 }

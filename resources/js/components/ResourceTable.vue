@@ -17,32 +17,37 @@
         @order="requestOrderByChange"
         @reset-order-by="resetOrderBy"
       />
-      <tbody>
-        <draggable item-key="id" v-model="fakeResources" handle=".handle" draggable="tr" @update="updateOrder">
-          <ResourceTableRow
-            v-for="(resource, index) in fakeResources"
-            :key="`${resource.id.value}-items-${index}`"
-            @actionExecuted="$emit('actionExecuted')"
-            :testId="`${resourceName}-items-${index}`"
-            :delete-resource="deleteResource"
-            :restore-resource="restoreResource"
-            :resource="resource"
-            :resource-name="resourceName"
-            :relationship-type="relationshipType"
-            :via-relationship="viaRelationship"
-            :via-resource="viaResource"
-            :via-resource-id="viaResourceId"
-            :via-many-to-many="viaManyToMany"
-            :checked="selectedResources.indexOf(resource) > -1"
-            :actions-are-available="actionsAreAvailable"
-            :actions-endpoint="actionsEndpoint"
-            :should-show-checkboxes="shouldShowCheckboxes"
-            :should-show-column-borders="shouldShowColumnBorders"
-            :table-style="tableStyle"
-            :update-selection-status="updateSelectionStatus"
-          />
-        </draggable>
-      </tbody>
+      <draggable
+        tag="tbody"
+        item-key="id"
+        v-model="fakeResources"
+        handle=".handle"
+        draggable="tr"
+        @update="updateOrder"
+      >
+        <ResourceTableRow
+          v-for="(resource, index) in fakeResources"
+          :key="`${resource.id.value}-items-${index}`"
+          @actionExecuted="$emit('actionExecuted')"
+          :testId="`${resourceName}-items-${index}`"
+          :delete-resource="deleteResource"
+          :restore-resource="restoreResource"
+          :resource="resource"
+          :resource-name="resourceName"
+          :relationship-type="relationshipType"
+          :via-relationship="viaRelationship"
+          :via-resource="viaResource"
+          :via-resource-id="viaResourceId"
+          :via-many-to-many="viaManyToMany"
+          :checked="selectedResources.indexOf(resource) > -1"
+          :actions-are-available="actionsAreAvailable"
+          :actions-endpoint="actionsEndpoint"
+          :should-show-checkboxes="shouldShowCheckboxes"
+          :should-show-column-borders="shouldShowColumnBorders"
+          :table-style="tableStyle"
+          :update-selection-status="updateSelectionStatus"
+        />
+      </draggable>
     </table>
   </div>
 </template>
