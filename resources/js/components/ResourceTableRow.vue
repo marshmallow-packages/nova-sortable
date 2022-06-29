@@ -3,7 +3,7 @@
     :data-pivot-id="resource['id'].pivotValue"
     :dusk="resource['id'].value + '-row'"
     class="group"
-    @click.stop.prevent="navigateToDetail"
+    @click.stop.prevent="resourceClickAction"
   >
     <!-- Resource Selection Checkbox -->
 
@@ -187,118 +187,14 @@
 <script>
 import filter from 'lodash/filter';
 import { Inertia } from '@inertiajs/inertia';
+import { mapProps, InteractsWithResourceInformation } from '@/mixins';
+
 import ReordersResources from '../mixins/ReordersResources';
+import ResourceTableRow from 'marshmallow-click/components/ResourceTableRow';
 
 export default {
-  emits: ['actionExecuted'],
   mixins: [ReordersResources],
 
-  props: [
-    'testId',
-    'deleteResource',
-    'restoreResource',
-    'resource',
-    'itemKey',
-    'resourcesSelected',
-    'resourceName',
-    'relationshipType',
-    'viaRelationship',
-    'viaResource',
-    'viaResourceId',
-    'viaManyToMany',
-    'checked',
-    'actionsAreAvailable',
-    'actionsEndpoint',
-    'shouldShowCheckboxes',
-    'shouldShowColumnBorders',
-    'tableStyle',
-    'updateSelectionStatus',
-    'queryString',
-  ],
-
-  data: () => ({
-    commandPressed: false,
-    deleteModalOpen: false,
-    restoreModalOpen: false,
-  }),
-
-  mounted() {
-    window.addEventListener('keydown', this.handleKeydown);
-    window.addEventListener('keyup', this.handleKeyup);
-  },
-
-  beforeUnmount() {
-    window.removeEventListener('keydown', this.handleKeydown);
-    window.removeEventListener('keyup', this.handleKeyup);
-  },
-
-  methods: {
-    /**
-     * Select the resource in the parent component
-     */
-    toggleSelection() {
-      this.updateSelectionStatus(this.resource);
-    },
-
-    handleKeydown(e) {
-      if (e.key === 'Meta') {
-        this.commandPressed = true;
-      }
-    },
-
-    handleKeyup(e) {
-      if (e.key === 'Meta') {
-        this.commandPressed = false;
-      }
-    },
-
-    navigateToDetail(e) {
-      if (!this.resource.authorizedToView) {
-        return;
-      }
-
-      this.commandPressed ? window.open(this.viewURL, '_blank') : Inertia.visit(this.viewURL);
-    },
-
-    openDeleteModal() {
-      this.deleteModalOpen = true;
-    },
-
-    confirmDelete() {
-      this.deleteResource(this.resource);
-      this.closeDeleteModal();
-    },
-
-    closeDeleteModal() {
-      this.deleteModalOpen = false;
-    },
-
-    openRestoreModal() {
-      this.restoreModalOpen = true;
-    },
-
-    confirmRestore() {
-      this.restoreResource(this.resource);
-      this.closeRestoreModal();
-    },
-
-    closeRestoreModal() {
-      this.restoreModalOpen = false;
-    },
-  },
-
-  computed: {
-    viewURL() {
-      return this.$url(`/resources/${this.resourceName}/${this.resource.id.value}`);
-    },
-
-    availableActions() {
-      return filter(this.resource.actions, a => a.showOnTableRow);
-    },
-
-    shouldShowTight() {
-      return this.tableStyle == 'tight';
-    },
-  },
+  extends: ResourceTableRow,
 };
 </script>

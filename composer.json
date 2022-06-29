@@ -10,9 +10,10 @@
   "license": "MIT",
   "require": {
     "php": "^8.0",
-    "spatie/eloquent-sortable": "^4.0.1",
     "laravel/nova": "^4.0",
-    "optimistdigital/nova-translations-loader": "^4.0.0"
+    "marshmallow/nova-resource-click": "^1.0",
+    "optimistdigital/nova-translations-loader": "^4.0.0",
+    "spatie/eloquent-sortable": "^4.0.1"
   },
   "repositories": [
     {
