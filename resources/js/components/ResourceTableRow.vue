@@ -3,7 +3,6 @@
     :data-pivot-id="resource['id'].pivotValue"
     :dusk="resource['id'].value + '-row'"
     class="group"
-    @click.stop.prevent="resourceClickAction"
   >
     <!-- Resource Selection Checkbox -->
 
@@ -49,7 +48,7 @@
         'border-r': shouldShowColumnBorders,
         'border-t border-gray-100 dark:border-gray-700': true,
         'whitespace-nowrap': !field.wrapping,
-        'cursor-pointer': resource.authorizedToView,
+        'cursor-pointer': resource.authorizedToView && clickAction !== 'ignore',
       }"
       class="dark:bg-gray-800 group-hover:bg-gray-50 dark:group-hover:bg-gray-900"
     >
@@ -72,7 +71,7 @@
       }"
       class="px-2 td-fit text-right align-middle dark:bg-gray-800 group-hover:bg-gray-50 dark:group-hover:bg-gray-900"
     >
-      <div class="flex items-center space-x-0 text-gray-400">
+      <div class="flex items-center justify-end space-x-0 text-gray-400">
         <InlineActionDropdown
           :actions="availableActions"
           :endpoint="actionsEndpoint"
@@ -83,6 +82,7 @@
           :via-resource-id="viaResourceId"
           :via-relationship="viaRelationship"
           @actionExecuted="$emit('actionExecuted')"
+          @show-preview="navigateToPreviewView"
         />
 
         <!-- View Resource Link -->
@@ -103,15 +103,21 @@
         <template v-if="resource.authorizedToUpdate">
           <!-- Edit Pivot Button -->
           <Link
-            v-if="relationshipType == 'belongsToMany' || relationshipType == 'morphToMany'"
+            v-if="
+              relationshipType == 'belongsToMany' ||
+              relationshipType == 'morphToMany'
+            "
             v-tooltip.click="__('Edit Attached')"
             :aria-label="__('Edit Attached')"
             :dusk="`${resource['id'].value}-edit-attached-button`"
             :href="
-              $url(`/resources/${viaResource}/${viaResourceId}/edit-attached/${resourceName}/${resource['id'].value}`, {
-                viaRelationship: viaRelationship,
-                viaPivotId: resource['id'].pivotValue,
-              })
+              $url(
+                `/resources/${viaResource}/${viaResourceId}/edit-attached/${resourceName}/${resource['id'].value}`,
+                {
+                  viaRelationship: viaRelationship,
+                  viaPivotId: resource['id'].pivotValue,
+                }
+              )
             "
             class="toolbar-button hover:text-primary-500"
             @click.stop
@@ -141,7 +147,10 @@
 
         <!-- Delete Resource Link -->
         <button
-          v-if="resource.authorizedToDelete && (!resource.softDeleted || viaManyToMany)"
+          v-if="
+            resource.authorizedToDelete &&
+            (!resource.softDeleted || viaManyToMany)
+          "
           v-tooltip.click="__(viaManyToMany ? 'Detach' : 'Delete')"
           :aria-label="__(viaManyToMany ? 'Detach' : 'Delete')"
           :data-testid="`${testId}-delete-button`"
@@ -154,7 +163,11 @@
 
         <!-- Restore Resource Link -->
         <button
-          v-if="resource.authorizedToRestore && resource.softDeleted && !viaManyToMany"
+          v-if="
+            resource.authorizedToRestore &&
+            resource.softDeleted &&
+            !viaManyToMany
+          "
           v-tooltip.click="__('Restore')"
           :aria-label="__('Restore')"
           :dusk="`${resource['id'].value}-restore-button`"
@@ -171,7 +184,11 @@
           @confirm="confirmDelete"
         />
 
-        <RestoreResourceModal :show="restoreModalOpen" @close="closeRestoreModal" @confirm="confirmRestore">
+        <RestoreResourceModal
+          :show="restoreModalOpen"
+          @close="closeRestoreModal"
+          @confirm="confirmRestore"
+        >
           <ModalHeader v-text="__('Restore Resource')" />
           <ModalContent>
             <p class="leading-normal">
@@ -182,19 +199,29 @@
       </div>
     </td>
   </tr>
+
+  <PreviewResourceModal
+    v-if="previewModalOpen"
+    :resource-id="resource.id.value"
+    :resource-name="resourceName"
+    :show="previewModalOpen"
+    @close="closePreviewModal"
+    @confirm="closePreviewModal"
+  />
 </template>
 
 <script>
-import filter from 'lodash/filter';
-import { Inertia } from '@inertiajs/inertia';
-import { mapProps, InteractsWithResourceInformation } from '@/mixins';
+import filter from 'lodash/filter'
+import { Inertia } from '@inertiajs/inertia'
+import { mapProps, InteractsWithResourceInformation } from '@/mixins'
 
-import ReordersResources from '../mixins/ReordersResources';
-import ResourceTableRow from 'marshmallow-click/components/ResourceTableRow';
+import ReordersResources from '../mixins/ReordersResources'
+import ResourceTableRow from 'marshmallow-click/components/ResourceTableRow'
 
 export default {
+  emits: ['actionExecuted'],
   mixins: [ReordersResources],
 
   extends: ResourceTableRow,
-};
+}
 </script>

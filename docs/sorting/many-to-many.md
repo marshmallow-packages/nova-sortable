@@ -110,4 +110,4 @@ public $sortable = [
 
 #### Sorting on both Index and ManyToMany
 
-See this issue for guidance: [nova-sortable/issues#60](https://github.com/marshmallow/nova-sortable/issues/60).
+See this issue for guidance: [nova-sortable/issues#60](https://github.com/outl1ne/nova-sortable/issues/60).
