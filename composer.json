@@ -11,7 +11,7 @@
   "require": {
     "php": "^8.0",
     "laravel/nova": "^4.12",
-    "optimistdigital/nova-translations-loader": "^4.0.0",
+    "outl1ne/nova-translations-loader": "^4.0.0",
     "spatie/eloquent-sortable": "^4.0.1"
   },
   "repositories": [
