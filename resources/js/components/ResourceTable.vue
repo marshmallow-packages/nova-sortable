@@ -25,6 +25,7 @@
         draggable="tr"
         @update="updateOrder"
       >
+        <!-- :key="`${resource.id.value}-items-${index}`" -->
         <ResourceTableRow
           v-for="(resource, index) in fakeResources"
           @actionExecuted="$emit('actionExecuted')"
@@ -205,17 +206,6 @@ export default {
 
     clickAction() {
       return this.resourceInformation.clickAction
-    },
-
-    /**
-     * Determine if the resource table should show column borders.
-     */
-    shouldShowColumnBorders() {
-      return this.resourceInformation.showColumnBorders
-    },
-
-    tableStyle() {
-      return this.resourceInformation.tableStyle
     },
   },
 }

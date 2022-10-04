@@ -3,6 +3,7 @@
     :data-pivot-id="resource['id'].pivotValue"
     :dusk="resource['id'].value + '-row'"
     class="group"
+    @click.stop.prevent="navigateToDetail"
   >
     <!-- Resource Selection Checkbox -->
 
@@ -216,12 +217,168 @@ import { Inertia } from '@inertiajs/inertia'
 import { mapProps, InteractsWithResourceInformation } from '@/mixins'
 
 import ReordersResources from '../mixins/ReordersResources'
-import ResourceTableRow from 'marshmallow-click/components/ResourceTableRow'
 
 export default {
   emits: ['actionExecuted'],
   mixins: [ReordersResources],
+  props: [
+    'testId',
+    'deleteResource',
+    'restoreResource',
+    'resource',
+    'resourcesSelected',
+    'resourceName',
+    'relationshipType',
+    'viaRelationship',
+    'viaResource',
+    'viaResourceId',
+    'viaManyToMany',
+    'checked',
+    'actionsAreAvailable',
+    'actionsEndpoint',
+    'shouldShowCheckboxes',
+    'shouldShowColumnBorders',
+    'tableStyle',
+    'updateSelectionStatus',
+    'queryString',
+    'clickAction',
+  ],
 
-  extends: ResourceTableRow,
+  data: () => ({
+    commandPressed: false,
+    deleteModalOpen: false,
+    restoreModalOpen: false,
+    previewModalOpen: false,
+  }),
+
+  mounted() {
+    window.addEventListener('keydown', this.handleKeydown)
+    window.addEventListener('keyup', this.handleKeyup)
+  },
+
+  beforeUnmount() {
+    window.removeEventListener('keydown', this.handleKeydown)
+    window.removeEventListener('keyup', this.handleKeyup)
+  },
+
+  methods: {
+    /**
+     * Select the resource in the parent component
+     */
+    toggleSelection() {
+      this.updateSelectionStatus(this.resource)
+    },
+
+    handleKeydown(e) {
+      if (e.key === 'Meta') {
+        this.commandPressed = true
+      }
+    },
+
+    handleKeyup(e) {
+      if (e.key === 'Meta') {
+        this.commandPressed = false
+      }
+    },
+
+    navigateToDetail(e) {
+      if (this.clickAction === 'edit') {
+        return this.navigateToEditView(e)
+      } else if (this.clickAction === 'select') {
+        return this.toggleSelection()
+      } else if (this.clickAction === 'ignore') {
+        return
+      } else if (this.clickAction === 'detail') {
+        return this.navigateToDetailView(e)
+      } else if (this.clickAction === 'preview') {
+        return this.navigateToPreviewView(e)
+      } else {
+        return this.navigateToDetailView(e)
+      }
+    },
+
+    navigateToDetailView(e) {
+      if (!this.resource.authorizedToView) {
+        return
+      }
+      this.commandPressed
+        ? window.open(this.viewURL, '_blank')
+        : Inertia.visit(this.viewURL)
+    },
+
+    navigateToEditView(e) {
+      if (!this.resource.authorizedToUpdate) {
+        return
+      }
+      this.commandPressed
+        ? window.open(this.updateURL, '_blank')
+        : Inertia.visit(this.updateURL)
+    },
+
+    navigateToPreviewView(e) {
+      this.openPreviewModal()
+    },
+
+    openPreviewModal() {
+      this.previewModalOpen = true
+    },
+
+    closePreviewModal() {
+      this.previewModalOpen = false
+    },
+
+    openDeleteModal() {
+      this.deleteModalOpen = true
+    },
+
+    confirmDelete() {
+      this.deleteResource(this.resource)
+      this.closeDeleteModal()
+    },
+
+    closeDeleteModal() {
+      this.deleteModalOpen = false
+    },
+
+    openRestoreModal() {
+      this.restoreModalOpen = true
+    },
+
+    confirmRestore() {
+      this.restoreResource(this.resource)
+      this.closeRestoreModal()
+    },
+
+    closeRestoreModal() {
+      this.restoreModalOpen = false
+    },
+  },
+
+  computed: {
+    updateURL() {
+      return this.$url(
+        `/resources/${this.resourceName}/${this.resource.id.value}/edit`,
+        {
+          viaResource: this.viaResource,
+          viaResourceId: this.viaResourceId,
+          viaRelationship: this.viaRelationship,
+        }
+      )
+    },
+
+    viewURL() {
+      return this.$url(
+        `/resources/${this.resourceName}/${this.resource.id.value}`
+      )
+    },
+
+    availableActions() {
+      return filter(this.resource.actions, a => a.showOnTableRow)
+    },
+
+    shouldShowTight() {
+      return this.tableStyle == 'tight'
+    },
+  },
 }
 </script>
