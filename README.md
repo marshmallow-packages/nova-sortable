@@ -1,5 +1,7 @@
 # Nova Sortable
 
+**This is a fork from the original package of [outl1ne/nova-sortable](https://github.com/outl1ne/nova-sortable)**
+
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/marshmallow/nova-sortable.svg?style=flat-square)](https://packagist.org/packages/marshmallow/nova-sortable)
 [![Total Downloads](https://img.shields.io/packagist/dt/marshmallow/nova-sortable.svg?style=flat-square)](https://packagist.org/packages/marshmallow/nova-sortable)
 
@@ -9,8 +11,8 @@ Uses Spatie's [eloquent-sortable](https://github.com/spatie/eloquent-sortable) u
 
 ## Requirements
 
-- `php: >=7.3`
-- `laravel/nova: ^3.0`
+- `php: >=8.0`
+- `laravel/nova: ^4.6.0`
 
 ## Features
 
@@ -30,7 +32,7 @@ Install the package in a Laravel Nova project via Composer:
 
 ```bash
 # Install package
-composer require marshmallow/nova-sortable
+composer require outl1ne/nova-sortable
 ```
 
 ## Usage
@@ -77,7 +79,7 @@ When the model does not have a sortable configuration, the default eloquent-sort
 Apply `HasSortableRows` trait from this package on the Resource:
 
 ```php
-use Marshmallow\NovaSortable\Traits\HasSortableRows;
+use Outl1ne\NovaSortable\Traits\HasSortableRows;
 
 class MyResource extends Resource
 {
@@ -199,7 +201,7 @@ See the documentation here: [Sorting ManyToMany relationships (w/ pivot table)](
 The translation file(s) can be published by using the following publish command:
 
 ```bash
-php artisan vendor:publish --provider="Marshmallow\NovaSortable\ToolServiceProvider" --tag="translations"
+php artisan vendor:publish --provider="Outl1ne\NovaSortable\ToolServiceProvider" --tag="translations"
 ```
 
 You can add your translations to `resources/lang/vendor/nova-sortable/` by creating a new translations file with the locale name (ie `et.json`) and copying the JSON from the existing `en.json`.
@@ -211,11 +213,15 @@ You can add your translations to `resources/lang/vendor/nova-sortable/` by creat
 This package overwrites the `indexQuery` of the Resource and if you still want to use it, you can do it as follows:
 
 ```php
+use HasSortableRows {
+    indexQuery as indexSortableQuery;
+}
+
 public static function indexQuery(NovaRequest $request, $query)
 {
   // Do whatever with the query
   // ie $query->withCount(['children', 'descendants', 'modules']);
-  return parent::indexQuery($request, HasSortableRows::indexQuery($request, $query));
+  return parent::indexQuery($request, static::indexSortableQuery($request, $query));
 }
 ```
 
