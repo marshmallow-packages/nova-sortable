@@ -4,7 +4,6 @@ namespace Marshmallow\NovaSortable\Http\Controllers;
 
 use Laravel\Nova\Nova;
 use Laravel\Nova\Http\Requests\NovaRequest;
-use Marshmallow\NovaSortable\Traits\HasSortableRows;
 
 class SortableController
 {
@@ -95,10 +94,11 @@ class SortableController
         if (empty($resourceClass)) return response()->json(['resourceName' => 'invalid'], 400);
 
         $modelClass = $resourceClass::$model;
+        $query = $modelClass::query();
         if (method_exists($modelClass, 'trashed')) {
-            $models = $modelClass::withTrashed()->findMany($resourceIds);
+            $models = $resourceClass::indexQuery($request, $query)->withTrashed()->findMany($resourceIds);
         } else {
-            $models = $modelClass::findMany($resourceIds);
+            $models = $resourceClass::indexQuery($request, $query)->findMany($resourceIds);
         }
         if ($models->count() !== sizeof($resourceIds)) return response()->json(['resourceIds' => 'invalid'], 400);
 
