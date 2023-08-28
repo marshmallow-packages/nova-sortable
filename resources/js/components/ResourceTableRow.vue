@@ -3,19 +3,19 @@
     :data-pivot-id="resource['id'].pivotValue"
     :dusk="resource['id'].value + '-row'"
     class="group"
+    :class="{
+      'divide-x divide-gray-100 dark:divide-gray-700': shouldShowColumnBorders,
+    }"
     @click.stop.prevent="navigateToDetail"
   >
     <!-- Resource Selection Checkbox -->
-
     <td
       v-if="shouldShowCheckboxes || canSeeReorderButtons"
       :class="{
         'py-2': !shouldShowTight,
-        'border-r': shouldShowColumnBorders,
-        'border-t border-gray-100 dark:border-gray-700 px-2': true,
         'cursor-pointer': resource.authorizedToView,
       }"
-      class="td-fit pl-5 pr-5 dark:bg-gray-800 group-hover:bg-gray-50 dark:group-hover:bg-gray-900"
+      class="pl-5 pr-5 td-fit dark:bg-gray-800 group-hover:bg-gray-50 dark:group-hover:bg-gray-900"
       @click.stop
     >
       <ReorderButtons
@@ -46,10 +46,8 @@
         'px-6': index == 0 && !shouldShowCheckboxes,
         'px-2': index != 0 || shouldShowCheckboxes,
         'py-2': !shouldShowTight,
-        'border-r': shouldShowColumnBorders,
-        'border-t border-gray-100 dark:border-gray-700': true,
         'whitespace-nowrap': !field.wrapping,
-        'cursor-pointer': resource.authorizedToView && clickAction !== 'ignore',
+        'cursor-pointer': clickableRow,
       }"
       class="dark:bg-gray-800 group-hover:bg-gray-50 dark:group-hover:bg-gray-900"
     >
@@ -67,13 +65,13 @@
     <td
       :class="{
         'py-2': !shouldShowTight,
-        'border-t border-gray-100 dark:border-gray-700': true,
         'cursor-pointer': resource.authorizedToView,
       }"
-      class="px-2 td-fit text-right align-middle dark:bg-gray-800 group-hover:bg-gray-50 dark:group-hover:bg-gray-900"
+      class="px-2 text-right align-middle td-fit dark:bg-gray-800 group-hover:bg-gray-50 dark:group-hover:bg-gray-900"
     >
       <div class="flex items-center justify-end space-x-0 text-gray-400">
         <InlineActionDropdown
+          v-if="shouldShowActionDropdown"
           :actions="availableActions"
           :endpoint="actionsEndpoint"
           :resource="resource"
@@ -87,76 +85,62 @@
         />
 
         <!-- View Resource Link -->
-        <template v-if="resource.authorizedToView">
-          <Link
-            v-tooltip.click="__('View')"
-            :aria-label="__('View')"
-            :data-testid="`${testId}-view-button`"
-            :dusk="`${resource['id'].value}-view-button`"
-            :href="$url(`/resources/${resourceName}/${resource['id'].value}`)"
-            class="toolbar-button hover:text-primary-500 px-2"
-            @click.stop
-          >
-            <Icon type="eye" />
-          </Link>
-        </template>
+        <Link
+          v-if="authorizedToViewAnyResources"
+          :as="!resource.authorizedToView ? 'button' : 'a'"
+          :disabled="!resource.authorizedToView"
+          v-tooltip.click="__('View')"
+          :aria-label="__('View')"
+          :dusk="`${resource['id'].value}-view-button`"
+          :href="viewURL"
+          class="px-2 toolbar-button hover:text-primary-500 disabled:opacity-50 disabled:pointer-events-none"
+          @click.stop
+        >
+          <Icon type="eye" />
+        </Link>
 
-        <template v-if="resource.authorizedToUpdate">
-          <!-- Edit Pivot Button -->
-          <Link
-            v-if="
-              relationshipType == 'belongsToMany' ||
-              relationshipType == 'morphToMany'
-            "
-            v-tooltip.click="__('Edit Attached')"
-            :aria-label="__('Edit Attached')"
-            :dusk="`${resource['id'].value}-edit-attached-button`"
-            :href="
-              $url(
-                `/resources/${viaResource}/${viaResourceId}/edit-attached/${resourceName}/${resource['id'].value}`,
-                {
-                  viaRelationship: viaRelationship,
-                  viaPivotId: resource['id'].pivotValue,
-                }
-              )
-            "
-            class="toolbar-button hover:text-primary-500"
-            @click.stop
-          >
-            <Icon type="pencil-alt" />
-          </Link>
+        <!-- Edit Pivot Button -->
+        <Link
+          v-if="authorizedToUpdateAnyResources && viaManyToMany"
+          :as="!resource.authorizedToUpdate ? 'button' : 'a'"
+          :disabled="!resource.authorizedToUpdate"
+          v-tooltip.click="__('Edit Attached')"
+          :aria-label="__('Edit Attached')"
+          :dusk="`${resource['id'].value}-edit-attached-button`"
+          :href="updateURL"
+          class="px-2 toolbar-button hover:text-primary-500 disabled:opacity-50 disabled:pointer-events-none"
+          @click.stop
+        >
+          <Icon type="pencil-alt" />
+        </Link>
 
-          <!-- Edit Resource Link -->
-          <Link
-            v-else
-            v-tooltip.click="__('Edit')"
-            :aria-label="__('Edit')"
-            :dusk="`${resource['id'].value}-edit-button`"
-            :href="
-              $url(`/resources/${resourceName}/${resource['id'].value}/edit`, {
-                viaResource: viaResource,
-                viaResourceId: viaResourceId,
-                viaRelationship: viaRelationship,
-              })
-            "
-            class="toolbar-button hover:text-primary-500 px-2"
-            @click.stop
-          >
-            <Icon type="pencil-alt" />
-          </Link>
-        </template>
+        <!-- Edit Resource Link -->
+        <Link
+          v-else-if="authorizedToUpdateAnyResources"
+          :as="!resource.authorizedToUpdate ? 'button' : 'a'"
+          :disabled="!resource.authorizedToUpdate"
+          v-tooltip.click="__('Edit')"
+          :aria-label="__('Edit')"
+          :dusk="`${resource['id'].value}-edit-button`"
+          :href="updateURL"
+          class="px-2 toolbar-button hover:text-primary-500 disabled:opacity-50 disabled:pointer-events-none"
+          @click.stop
+        >
+          <Icon type="pencil-alt" />
+        </Link>
 
         <!-- Delete Resource Link -->
         <button
           v-if="
-            resource.authorizedToDelete &&
+            authorizedToDeleteAnyResources &&
             (!resource.softDeleted || viaManyToMany)
           "
           v-tooltip.click="__(viaManyToMany ? 'Detach' : 'Delete')"
           :aria-label="__(viaManyToMany ? 'Detach' : 'Delete')"
           :data-testid="`${testId}-delete-button`"
+          :disabled="!resource.authorizedToDelete"
           :dusk="`${resource['id'].value}-delete-button`"
-          class="toolbar-button hover:text-primary-500 px-2"
+          class="px-2 toolbar-button hover:text-primary-500 disabled:opacity-50 disabled:pointer-events-none"
           @click.stop="openDeleteModal"
         >
           <Icon type="trash" />
@@ -165,14 +149,15 @@
         <!-- Restore Resource Link -->
         <button
           v-if="
-            resource.authorizedToRestore &&
+            authorizedToRestoreAnyResources &&
             resource.softDeleted &&
             !viaManyToMany
           "
           v-tooltip.click="__('Restore')"
           :aria-label="__('Restore')"
+          :disabled="!resource.authorizedToRestore"
           :dusk="`${resource['id'].value}-restore-button`"
-          class="toolbar-button hover:text-primary-500 px-2"
+          class="px-2 toolbar-button hover:text-primary-500 disabled:opacity-50 disabled:pointer-events-none"
           @click.stop="openRestoreModal"
         >
           <Icon type="refresh" />
@@ -214,13 +199,20 @@
 <script>
 import filter from 'lodash/filter'
 import { Inertia } from '@inertiajs/inertia'
-import { mapProps, InteractsWithResourceInformation } from '@/mixins'
-
 import ReordersResources from '../mixins/ReordersResources'
+import { mapGetters } from 'vuex'
 
 export default {
   emits: ['actionExecuted'],
   mixins: [ReordersResources],
+
+  inject: [
+    'authorizedToViewAnyResources',
+    'authorizedToUpdateAnyResources',
+    'authorizedToDeleteAnyResources',
+    'authorizedToRestoreAnyResources',
+  ],
+
   props: [
     'testId',
     'deleteResource',
@@ -270,13 +262,13 @@ export default {
     },
 
     handleKeydown(e) {
-      if (e.key === 'Meta') {
+      if (e.key === 'Meta' || e.key === 'Control') {
         this.commandPressed = true
       }
     },
 
     handleKeyup(e) {
-      if (e.key === 'Meta') {
+      if (e.key === 'Meta' || e.key === 'Control') {
         this.commandPressed = false
       }
     },
@@ -316,6 +308,9 @@ export default {
     },
 
     navigateToPreviewView(e) {
+      if (!this.resource.authorizedToView) {
+        return
+      }
       this.openPreviewModal()
     },
 
@@ -355,7 +350,19 @@ export default {
   },
 
   computed: {
+    ...mapGetters(['currentUser']),
+
     updateURL() {
+      if (this.viaManyToMany) {
+        return this.$url(
+          `/resources/${this.viaResource}/${this.viaResourceId}/edit-attached/${this.resourceName}/${this.resource.id.value}`,
+          {
+            viaRelationship: this.viaRelationship,
+            viaPivotId: this.resource.id.pivotValue,
+          }
+        )
+      }
+
       return this.$url(
         `/resources/${this.resourceName}/${this.resource.id.value}/edit`,
         {
@@ -377,7 +384,45 @@ export default {
     },
 
     shouldShowTight() {
-      return this.tableStyle == 'tight'
+      return this.tableStyle === 'tight'
+    },
+
+    clickableRow() {
+      if (this.clickAction === 'edit') {
+        return this.resource.authorizedToUpdate
+      } else if (this.clickAction === 'select') {
+        return this.shouldShowCheckboxes
+      } else if (this.clickAction === 'ignore') {
+        return false
+      } else if (this.clickAction === 'detail') {
+        return this.resource.authorizedToView
+      } else if (this.clickAction === 'preview') {
+        return this.resource.authorizedToView
+      } else {
+        return this.resource.authorizedToView
+      }
+    },
+
+    shouldShowActionDropdown() {
+      return this.availableActions.length > 0 || this.userHasAnyOptions
+    },
+
+    shouldShowPreviewLink() {
+      return this.resource.authorizedToView && this.resource.previewHasFields
+    },
+
+    userHasAnyOptions() {
+      return (
+        this.resource.authorizedToReplicate ||
+        this.shouldShowPreviewLink ||
+        this.canBeImpersonated
+      )
+    },
+
+    canBeImpersonated() {
+      return (
+        this.currentUser.canImpersonate && this.resource.authorizedToImpersonate
+      )
     },
   },
 }

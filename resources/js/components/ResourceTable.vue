@@ -1,11 +1,8 @@
 <template>
-  <div class="overflow-hidden overflow-x-auto relative">
+  <div class="relative overflow-hidden overflow-x-auto">
     <table
       v-if="resources.length > 0"
-      class="w-full"
-      :class="[`table-${tableStyle}`]"
-      cellpadding="0"
-      cellspacing="0"
+      class="w-full divide-y divide-gray-100 dark:divide-gray-700"
       data-testid="resource-table"
     >
       <ResourceTableHeader
@@ -23,14 +20,14 @@
         v-model="fakeResources"
         handle=".handle"
         draggable="tr"
+        class="divide-y divide-gray-100 dark:divide-gray-700"
         @update="updateOrder"
       >
-        <!-- :key="`${resource.id.value}-items-${index}`" -->
         <ResourceTableRow
-          v-for="(resource, index) in fakeResources"
+          v-for="(resource, index) in resources"
           @actionExecuted="$emit('actionExecuted')"
           :testId="`${resourceName}-items-${index}`"
-          :key="`${resourceName}-items-${index}`"
+          :key="`${resource.id.value}-items-${index}`"
           :delete-resource="deleteResource"
           :restore-resource="restoreResource"
           :resource="resource"
@@ -78,54 +75,21 @@ export default {
   },
 
   props: {
-    authorizedToRelate: {
-      type: Boolean,
-      required: true,
-    },
-    resourceName: {
-      default: null,
-    },
-    resources: {
-      default: [],
-    },
-    singularName: {
-      type: String,
-      required: true,
-    },
-    selectedResources: {
-      default: [],
-    },
+    authorizedToRelate: { type: Boolean, required: true },
+    resourceName: { default: null },
+    resources: { default: [] },
+    singularName: { type: String, required: true },
+    selectedResources: { default: [] },
     selectedResourceIds: {},
-    shouldShowCheckboxes: {
-      type: Boolean,
-      default: false,
-    },
-    actionsAreAvailable: {
-      type: Boolean,
-      default: false,
-    },
-    viaResource: {
-      default: null,
-    },
-    viaResourceId: {
-      default: null,
-    },
-    viaRelationship: {
-      default: null,
-    },
-    relationshipType: {
-      default: null,
-    },
-    updateSelectionStatus: {
-      type: Function,
-    },
-    actionsEndpoint: {
-      default: null,
-    },
-    sortable: {
-      type: Boolean,
-      default: false,
-    },
+    shouldShowCheckboxes: { type: Boolean, default: false },
+    actionsAreAvailable: { type: Boolean, default: false },
+    viaResource: { default: null },
+    viaResourceId: { default: null },
+    viaRelationship: { default: null },
+    relationshipType: { default: null },
+    updateSelectionStatus: { type: Function },
+    actionsEndpoint: { default: null },
+    sortable: { type: Boolean, default: false },
   },
 
   data: () => ({
@@ -185,15 +149,6 @@ export default {
     },
 
     /**
-     * Determine if the current resource listing is via a has-one relationship.
-     */
-    viaHasOne() {
-      return (
-        this.relationshipType == 'hasOne' || this.relationshipType == 'morphOne'
-      )
-    },
-
-    /**
      * Determine if the resource table should show column borders.
      */
     shouldShowColumnBorders() {
@@ -210,9 +165,3 @@ export default {
   },
 }
 </script>
-
-<style>
-.flip-list-move {
-  transition: transform 0.25s;
-}
-</style>
