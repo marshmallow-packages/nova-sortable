@@ -12,6 +12,7 @@
         <span v-if="shouldShowCheckboxes" class="sr-only">{{ __('Selected Resources') }}</span>
       </th>
 
+      <!-- Field Names -->
       <th
         v-for="(field, index) in fields"
         :key="field.uniqueKey"
