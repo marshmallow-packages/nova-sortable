@@ -1,12 +1,12 @@
 <template>
   <tr
-    :data-pivot-id="resource['id'].pivotValue"
-    :dusk="resource['id'].value + '-row'"
+    :data-pivot-id="resource.id.pivotValue"
+    :dusk="`${resource.id.value}-row`"
     class="group"
     :class="{
       'divide-x divide-gray-100 dark:divide-gray-700': shouldShowColumnBorders,
     }"
-    @click.stop.prevent="navigateToDetail"
+    @click.stop.prevent="handleClick"
   >
     <!-- Resource Selection Checkbox -->
     <td
@@ -30,10 +30,9 @@
       >
         <Checkbox
           v-if="shouldShowCheckboxes"
+          :dusk="`${resource.id.value}-checkbox`"
           :aria-label="__('Select Resource :title', { title: resource.title })"
           :checked="checked"
-          :data-testid="`${testId}-checkbox`"
-          :dusk="`${resource['id'].value}-checkbox`"
           @input="toggleSelection"
         />
       </ReorderButtons>
@@ -93,7 +92,7 @@
           v-tooltip.click="__('View')"
           :aria-label="__('View')"
           :dusk="`${resource['id'].value}-view-button`"
-          :href="$url(`/resources/${resourceName}/${resource['id'].value}`)"
+          :href="viewURL"
           class="toolbar-button hover:text-primary-500 px-2 disabled:opacity-50 disabled:pointer-events-none"
           @click.stop
         >
@@ -102,25 +101,13 @@
 
         <!-- Edit Pivot Button -->
         <Link
-          v-if="
-            authorizedToUpdateAnyResources &&
-            (relationshipType == 'belongsToMany' ||
-              relationshipType == 'morphToMany')
-          "
+          v-if="authorizedToUpdateAnyResources && viaManyToMany"
           :as="!resource.authorizedToUpdate ? 'button' : 'a'"
           :disabled="!resource.authorizedToUpdate"
           v-tooltip.click="__('Edit Attached')"
           :aria-label="__('Edit Attached')"
           :dusk="`${resource['id'].value}-edit-attached-button`"
-          :href="
-            $url(
-              `/resources/${viaResource}/${viaResourceId}/edit-attached/${resourceName}/${resource['id'].value}`,
-              {
-                viaRelationship: viaRelationship,
-                viaPivotId: resource['id'].pivotValue,
-              }
-            )
-          "
+          :href="updateURL"
           class="toolbar-button hover:text-primary-500 px-2 disabled:opacity-50 disabled:pointer-events-none"
           @click.stop
         >
@@ -135,13 +122,7 @@
           v-tooltip.click="__('Edit')"
           :aria-label="__('Edit')"
           :dusk="`${resource['id'].value}-edit-button`"
-          :href="
-            $url(`/resources/${resourceName}/${resource['id'].value}/edit`, {
-              viaResource: viaResource,
-              viaResourceId: viaResourceId,
-              viaRelationship: viaRelationship,
-            })
-          "
+          :href="updateURL"
           class="toolbar-button hover:text-primary-500 px-2 disabled:opacity-50 disabled:pointer-events-none"
           @click.stop
         >
@@ -149,21 +130,18 @@
         </Link>
 
         <!-- Delete Resource Link -->
-        <button
+        <Button
+          @click.stop="openDeleteModal"
           v-if="
             authorizedToDeleteAnyResources &&
             (!resource.softDeleted || viaManyToMany)
           "
-          v-tooltip.click="__(viaManyToMany ? 'Detach' : 'Delete')"
           :aria-label="__(viaManyToMany ? 'Detach' : 'Delete')"
-          :data-testid="`${testId}-delete-button`"
           :disabled="!resource.authorizedToDelete"
-          :dusk="`${resource['id'].value}-delete-button`"
-          class="toolbar-button hover:text-primary-500 px-2 disabled:opacity-50 disabled:pointer-events-none"
-          @click.stop="openDeleteModal"
-        >
-          <Icon type="trash" />
-        </button>
+          :dusk="`${resource.id.value}-delete-button`"
+          variant="action"
+          v-tooltip.click="__(viaManyToMany ? 'Detach' : 'Delete')"
+        />
 
         <!-- Restore Resource Link -->
         <button
@@ -175,8 +153,9 @@
           v-tooltip.click="__('Restore')"
           :aria-label="__('Restore')"
           :disabled="!resource.authorizedToRestore"
-          :dusk="`${resource['id'].value}-restore-button`"
+          :dusk="`${resource.id.value}-restore-button`"
           class="toolbar-button hover:text-primary-500 px-2 disabled:opacity-50 disabled:pointer-events-none"
+          type="button"
           @click.stop="openRestoreModal"
         >
           <Icon type="refresh" />
@@ -218,9 +197,17 @@
 <script>
 import filter from 'lodash/filter'
 import ReordersResources from '../mixins/ReordersResources'
+import { Inertia } from '@inertiajs/inertia'
 import { mapGetters } from 'vuex'
+import { Button, Checkbox, Icon } from 'laravel-nova-ui'
 
 export default {
+  components: {
+    Button,
+    Checkbox,
+    Icon,
+  },
+
   emits: ['actionExecuted'],
   mixins: [ReordersResources],
 
@@ -232,26 +219,26 @@ export default {
   ],
 
   props: [
-    'testId',
-    'deleteResource',
-    'restoreResource',
-    'resource',
-    'resourcesSelected',
-    'resourceName',
-    'relationshipType',
-    'viaRelationship',
-    'viaResource',
-    'viaResourceId',
-    'viaManyToMany',
-    'checked',
     'actionsAreAvailable',
     'actionsEndpoint',
+    'checked',
+    'clickAction',
+    'deleteResource',
+    'queryString',
+    'relationshipType',
+    'resource',
+    'resourceName',
+    'resourcesSelected',
+    'restoreResource',
     'shouldShowCheckboxes',
     'shouldShowColumnBorders',
     'tableStyle',
+    'testId',
     'updateSelectionStatus',
-    'queryString',
-    'clickAction',
+    'viaManyToMany',
+    'viaRelationship',
+    'viaResource',
+    'viaResourceId',
   ],
 
   data: () => ({
@@ -260,6 +247,10 @@ export default {
     restoreModalOpen: false,
     previewModalOpen: false,
   }),
+
+  beforeMount() {
+    this.isSelected = this.selectedResources.indexOf(this.resource) > -1
+  },
 
   mounted() {
     window.addEventListener('keydown', this.handleKeydown)
@@ -280,18 +271,18 @@ export default {
     },
 
     handleKeydown(e) {
-      if (e.key === 'Meta') {
+      if (e.key === 'Meta' || e.key === 'Control') {
         this.commandPressed = true
       }
     },
 
     handleKeyup(e) {
-      if (e.key === 'Meta') {
+      if (e.key === 'Meta' || e.key === 'Control') {
         this.commandPressed = false
       }
     },
 
-    navigateToDetail(e) {
+    handleClick(e) {
       if (this.clickAction === 'edit') {
         return this.navigateToEditView(e)
       } else if (this.clickAction === 'select') {
@@ -313,7 +304,7 @@ export default {
       }
       this.commandPressed
         ? window.open(this.viewURL, '_blank')
-        : this.$inertia.visit(this.viewURL) // use this instead of the Inertia.visit to avoid the following issue: https://github.com/outl1ne/nova-sortable/issues/128#issuecomment-1171264760
+        : Inertia.visit(this.viewURL)
     },
 
     navigateToEditView(e) {
@@ -322,7 +313,7 @@ export default {
       }
       this.commandPressed
         ? window.open(this.updateURL, '_blank')
-        : this.$inertia.visit(this.updateURL) // use this instead of the Inertia.visit to avoid the following issue: https://github.com/outl1ne/nova-sortable/issues/128#issuecomment-1171264760
+        : Inertia.visit(this.updateURL)
     },
 
     navigateToPreviewView(e) {
@@ -371,6 +362,16 @@ export default {
     ...mapGetters(['currentUser']),
 
     updateURL() {
+      if (this.viaManyToMany) {
+        return this.$url(
+          `/resources/${this.viaResource}/${this.viaResourceId}/edit-attached/${this.resourceName}/${this.resource.id.value}`,
+          {
+            viaRelationship: this.viaRelationship,
+            viaPivotId: this.resource.id.pivotValue,
+          }
+        )
+      }
+
       return this.$url(
         `/resources/${this.resourceName}/${this.resource.id.value}/edit`,
         {
@@ -414,9 +415,11 @@ export default {
     shouldShowActionDropdown() {
       return this.availableActions.length > 0 || this.userHasAnyOptions
     },
+
     shouldShowPreviewLink() {
       return this.resource.authorizedToView && this.resource.previewHasFields
     },
+
     userHasAnyOptions() {
       return (
         this.resource.authorizedToReplicate ||
@@ -424,6 +427,7 @@ export default {
         this.canBeImpersonated
       )
     },
+
     canBeImpersonated() {
       return (
         this.currentUser.canImpersonate && this.resource.authorizedToImpersonate
