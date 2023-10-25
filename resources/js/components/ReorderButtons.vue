@@ -7,7 +7,7 @@
           @click.stop="!reorderDisabled && $emit('moveToStart')"
           :custom-class="{
             'cursor-pointer text-gray-400 hover:text-primary-400 active:text-primary-500': !reorderDisabled,
-            'cursor-default text-gray-200': reorderDisabled,
+            'cursor-default text-gray-200 dark:text-gray-600': reorderDisabled,
           }"
           v-tooltip="moveToStartTooltip"
         />
@@ -16,7 +16,7 @@
           @click.stop="!reorderDisabled && $emit('moveToEnd')"
           :custom-class="{
             'cursor-pointer text-gray-400 hover:text-primary-400  active:text-primary-500': !reorderDisabled,
-            'cursor-default text-gray-200': reorderDisabled,
+            'cursor-default text-gray-200 dark:text-gray-600': reorderDisabled,
           }"
           v-tooltip="moveToEndTooltip"
         />
@@ -26,7 +26,7 @@
         style="min-width: 22px; width: 22px"
         :custom-class="{
           'handle cursor-move text-gray-400 hover:text-primary-400 active:text-primary-500': !reorderDisabled,
-          'text-gray-200 cursor-default': reorderDisabled,
+          'cursor-default text-gray-200 dark:text-gray-600': reorderDisabled,
         }"
       />
     </div>
