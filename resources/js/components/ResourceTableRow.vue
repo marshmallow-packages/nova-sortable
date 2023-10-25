@@ -13,9 +13,10 @@
       v-if="shouldShowCheckboxes || canSeeReorderButtons"
       :class="{
         'py-2': !shouldShowTight,
+        'border-t border-gray-100 dark:border-gray-700 px-2': true,
         'cursor-pointer': resource.authorizedToView,
       }"
-      class="pl-5 pr-5 td-fit dark:bg-gray-800 group-hover:bg-gray-50 dark:group-hover:bg-gray-900"
+      class="td-fit pl-5 pr-5 dark:bg-gray-800 group-hover:bg-gray-50 dark:group-hover:bg-gray-900"
       @click.stop
     >
       <ReorderButtons
@@ -67,7 +68,7 @@
         'py-2': !shouldShowTight,
         'cursor-pointer': resource.authorizedToView,
       }"
-      class="px-2 text-right align-middle td-fit dark:bg-gray-800 group-hover:bg-gray-50 dark:group-hover:bg-gray-900"
+      class="px-2 td-fit text-right align-middle dark:bg-gray-800 group-hover:bg-gray-50 dark:group-hover:bg-gray-900"
     >
       <div class="flex items-center justify-end space-x-0 text-gray-400">
         <InlineActionDropdown
@@ -92,8 +93,8 @@
           v-tooltip.click="__('View')"
           :aria-label="__('View')"
           :dusk="`${resource['id'].value}-view-button`"
-          :href="viewURL"
-          class="px-2 toolbar-button hover:text-primary-500 disabled:opacity-50 disabled:pointer-events-none"
+          :href="$url(`/resources/${resourceName}/${resource['id'].value}`)"
+          class="toolbar-button hover:text-primary-500 px-2 disabled:opacity-50 disabled:pointer-events-none"
           @click.stop
         >
           <Icon type="eye" />
@@ -101,14 +102,26 @@
 
         <!-- Edit Pivot Button -->
         <Link
-          v-if="authorizedToUpdateAnyResources && viaManyToMany"
+          v-if="
+            authorizedToUpdateAnyResources &&
+            (relationshipType == 'belongsToMany' ||
+              relationshipType == 'morphToMany')
+          "
           :as="!resource.authorizedToUpdate ? 'button' : 'a'"
           :disabled="!resource.authorizedToUpdate"
           v-tooltip.click="__('Edit Attached')"
           :aria-label="__('Edit Attached')"
           :dusk="`${resource['id'].value}-edit-attached-button`"
-          :href="updateURL"
-          class="px-2 toolbar-button hover:text-primary-500 disabled:opacity-50 disabled:pointer-events-none"
+          :href="
+            $url(
+              `/resources/${viaResource}/${viaResourceId}/edit-attached/${resourceName}/${resource['id'].value}`,
+              {
+                viaRelationship: viaRelationship,
+                viaPivotId: resource['id'].pivotValue,
+              }
+            )
+          "
+          class="toolbar-button hover:text-primary-500 px-2 disabled:opacity-50 disabled:pointer-events-none"
           @click.stop
         >
           <Icon type="pencil-alt" />
@@ -122,8 +135,14 @@
           v-tooltip.click="__('Edit')"
           :aria-label="__('Edit')"
           :dusk="`${resource['id'].value}-edit-button`"
-          :href="updateURL"
-          class="px-2 toolbar-button hover:text-primary-500 disabled:opacity-50 disabled:pointer-events-none"
+          :href="
+            $url(`/resources/${resourceName}/${resource['id'].value}/edit`, {
+              viaResource: viaResource,
+              viaResourceId: viaResourceId,
+              viaRelationship: viaRelationship,
+            })
+          "
+          class="toolbar-button hover:text-primary-500 px-2 disabled:opacity-50 disabled:pointer-events-none"
           @click.stop
         >
           <Icon type="pencil-alt" />
@@ -140,7 +159,7 @@
           :data-testid="`${testId}-delete-button`"
           :disabled="!resource.authorizedToDelete"
           :dusk="`${resource['id'].value}-delete-button`"
-          class="px-2 toolbar-button hover:text-primary-500 disabled:opacity-50 disabled:pointer-events-none"
+          class="toolbar-button hover:text-primary-500 px-2 disabled:opacity-50 disabled:pointer-events-none"
           @click.stop="openDeleteModal"
         >
           <Icon type="trash" />
@@ -157,7 +176,7 @@
           :aria-label="__('Restore')"
           :disabled="!resource.authorizedToRestore"
           :dusk="`${resource['id'].value}-restore-button`"
-          class="px-2 toolbar-button hover:text-primary-500 disabled:opacity-50 disabled:pointer-events-none"
+          class="toolbar-button hover:text-primary-500 px-2 disabled:opacity-50 disabled:pointer-events-none"
           @click.stop="openRestoreModal"
         >
           <Icon type="refresh" />
@@ -198,7 +217,6 @@
 
 <script>
 import filter from 'lodash/filter'
-import { Inertia } from '@inertiajs/inertia'
 import ReordersResources from '../mixins/ReordersResources'
 import { mapGetters } from 'vuex'
 
@@ -262,13 +280,13 @@ export default {
     },
 
     handleKeydown(e) {
-      if (e.key === 'Meta' || e.key === 'Control') {
+      if (e.key === 'Meta') {
         this.commandPressed = true
       }
     },
 
     handleKeyup(e) {
-      if (e.key === 'Meta' || e.key === 'Control') {
+      if (e.key === 'Meta') {
         this.commandPressed = false
       }
     },
@@ -295,7 +313,7 @@ export default {
       }
       this.commandPressed
         ? window.open(this.viewURL, '_blank')
-        : Inertia.visit(this.viewURL)
+        : this.$inertia.visit(this.viewURL) // use this instead of the Inertia.visit to avoid the following issue: https://github.com/outl1ne/nova-sortable/issues/128#issuecomment-1171264760
     },
 
     navigateToEditView(e) {
@@ -304,7 +322,7 @@ export default {
       }
       this.commandPressed
         ? window.open(this.updateURL, '_blank')
-        : Inertia.visit(this.updateURL)
+        : this.$inertia.visit(this.updateURL) // use this instead of the Inertia.visit to avoid the following issue: https://github.com/outl1ne/nova-sortable/issues/128#issuecomment-1171264760
     },
 
     navigateToPreviewView(e) {
@@ -353,16 +371,6 @@ export default {
     ...mapGetters(['currentUser']),
 
     updateURL() {
-      if (this.viaManyToMany) {
-        return this.$url(
-          `/resources/${this.viaResource}/${this.viaResourceId}/edit-attached/${this.resourceName}/${this.resource.id.value}`,
-          {
-            viaRelationship: this.viaRelationship,
-            viaPivotId: this.resource.id.pivotValue,
-          }
-        )
-      }
-
       return this.$url(
         `/resources/${this.resourceName}/${this.resource.id.value}/edit`,
         {
@@ -406,11 +414,9 @@ export default {
     shouldShowActionDropdown() {
       return this.availableActions.length > 0 || this.userHasAnyOptions
     },
-
     shouldShowPreviewLink() {
       return this.resource.authorizedToView && this.resource.previewHasFields
     },
-
     userHasAnyOptions() {
       return (
         this.resource.authorizedToReplicate ||
@@ -418,7 +424,6 @@ export default {
         this.canBeImpersonated
       )
     },
-
     canBeImpersonated() {
       return (
         this.currentUser.canImpersonate && this.resource.authorizedToImpersonate

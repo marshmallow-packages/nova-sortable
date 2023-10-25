@@ -1,5 +1,5 @@
 <template>
-  <div class="relative overflow-hidden overflow-x-auto">
+  <div class="overflow-hidden overflow-x-auto relative">
     <table
       v-if="resources.length > 0"
       class="w-full divide-y divide-gray-100 dark:divide-gray-700"
@@ -13,21 +13,21 @@
         :sortable="sortable"
         @order="requestOrderByChange"
         @reset-order-by="resetOrderBy"
+        :resource="{ ...(fakeResources[0] || {}) }"
       />
       <draggable
         tag="tbody"
-        item-key="id"
         v-model="fakeResources"
         handle=".handle"
         draggable="tr"
-        class="divide-y divide-gray-100 dark:divide-gray-700"
         @update="updateOrder"
+        class="divide-y divide-gray-100 dark:divide-gray-700"
       >
         <ResourceTableRow
-          v-for="(resource, index) in resources"
+          v-for="(resource, index) in fakeResources"
           @actionExecuted="$emit('actionExecuted')"
           :testId="`${resourceName}-items-${index}`"
-          :key="`${resource.id.value}-items-${index}`"
+          :key="`${resourceName}-items-${index}-${resource.id.value}`"
           :delete-resource="deleteResource"
           :restore-resource="restoreResource"
           :resource="resource"
@@ -59,14 +59,7 @@ import { VueDraggableNext } from 'vue-draggable-next'
 import ReordersResources from '../mixins/ReordersResources'
 
 export default {
-  emits: [
-    'actionExecuted',
-    'updateOrder',
-    'delete',
-    'restore',
-    'order',
-    'reset-order-by',
-  ],
+  emits: ['actionExecuted', 'delete', 'restore', 'order', 'reset-order-by'],
 
   mixins: [InteractsWithResourceInformation, ReordersResources],
 
@@ -75,21 +68,54 @@ export default {
   },
 
   props: {
-    authorizedToRelate: { type: Boolean, required: true },
-    resourceName: { default: null },
-    resources: { default: [] },
-    singularName: { type: String, required: true },
-    selectedResources: { default: [] },
+    authorizedToRelate: {
+      type: Boolean,
+      required: true,
+    },
+    resourceName: {
+      default: null,
+    },
+    resources: {
+      default: [],
+    },
+    singularName: {
+      type: String,
+      required: true,
+    },
+    selectedResources: {
+      default: [],
+    },
     selectedResourceIds: {},
-    shouldShowCheckboxes: { type: Boolean, default: false },
-    actionsAreAvailable: { type: Boolean, default: false },
-    viaResource: { default: null },
-    viaResourceId: { default: null },
-    viaRelationship: { default: null },
-    relationshipType: { default: null },
-    updateSelectionStatus: { type: Function },
-    actionsEndpoint: { default: null },
-    sortable: { type: Boolean, default: false },
+    shouldShowCheckboxes: {
+      type: Boolean,
+      default: false,
+    },
+    actionsAreAvailable: {
+      type: Boolean,
+      default: false,
+    },
+    viaResource: {
+      default: null,
+    },
+    viaResourceId: {
+      default: null,
+    },
+    viaRelationship: {
+      default: null,
+    },
+    relationshipType: {
+      default: null,
+    },
+    updateSelectionStatus: {
+      type: Function,
+    },
+    actionsEndpoint: {
+      default: null,
+    },
+    sortable: {
+      type: Boolean,
+      default: false,
+    },
   },
 
   data: () => ({
@@ -149,6 +175,15 @@ export default {
     },
 
     /**
+     * Determine if the current resource listing is via a has-one relationship.
+     */
+    viaHasOne() {
+      return (
+        this.relationshipType == 'hasOne' || this.relationshipType == 'morphOne'
+      )
+    },
+
+    /**
      * Determine if the resource table should show column borders.
      */
     shouldShowColumnBorders() {
@@ -165,3 +200,9 @@ export default {
   },
 }
 </script>
+
+<style>
+.flip-list-move {
+  transition: transform 0.25s;
+}
+</style>
