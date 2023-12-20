@@ -38,11 +38,15 @@ import ChevronUpIcon from '../icons/ChevronUpIcon';
 import ChevronDownIcon from '../icons/ChevronDownIcon';
 import BurgerIcon from '../icons/BurgerIcon';
 import { canSortResource } from '../mixins/canSortResource';
+import { InteractsWithQueryString } from 'laravel-nova-mixins';
 
 export default {
   components: { ChevronUpIcon, ChevronDownIcon, BurgerIcon },
+  mixins: [InteractsWithQueryString],
 
   props: ['resource', 'viaResourceId', 'relationshipType', 'viaRelationship', 'resourceName'],
+
+  inject: ['orderByParameter', 'orderByDirectionParameter'],
 
   computed: {
     canSeeReorderButtons() {
@@ -78,31 +82,31 @@ export default {
     },
 
     /**
-     * The order query parameter for the sortable resource
+     * The current order query parameter for this resource
      */
     sortKey() {
-      return `${this.resourceKey}_order`;
+      return this.orderByParameter;
     },
 
     /**
      * The current order query parameter value
      */
     sortColumn() {
-      return this.routeParameters[this.sortKey];
+      return this.queryStringParams[this.sortKey];
     },
 
     /**
-     * The direction query parameter for the sortable resource
+     * The current direction query parameter for this resource
      */
     directionKey() {
-      return `${this.resourceKey}_direction`;
+      return this.orderByDirectionParameter;
     },
 
     /**
      * The current direction query parameter value
      */
     direction() {
-      return this.routeParameters[this.directionKey];
+      return this.queryStringParams[this.directionKey];
     },
 
     /**
@@ -113,7 +117,7 @@ export default {
     },
 
     /**
-     * Check if there is a current direction
+     * Determine whether this column is being sorted
      */
     isSorted() {
       return !!this.routeParameters[this.sortKey];
