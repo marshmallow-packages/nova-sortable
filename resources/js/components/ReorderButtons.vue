@@ -66,6 +66,10 @@ export default {
       return false;
     },
 
+    uriKey() {
+      return this.routeParameters[this.sortKey];
+    },
+
     /**
      * The current route parameters
      */
@@ -120,7 +124,7 @@ export default {
      * Determine whether this column is being sorted
      */
     isSorted() {
-      return !!this.routeParameters[this.sortKey];
+      return this.sortColumn == this.uriKey && this.hasDirection;
     },
 
     /**
