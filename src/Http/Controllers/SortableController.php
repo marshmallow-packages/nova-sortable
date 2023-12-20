@@ -138,7 +138,8 @@ class SortableController
     public function moveToStart(NovaRequest $request)
     {
         $validationResult = $this->validateRequest($request);
-        $method = $request->resource()::getOrderByDirection($validationResult->sortable) !== 'DESC' ? 'moveToStart' : 'moveToEnd';
+        $sort_desc = $request->resource()::getOrderByDirection($validationResult->sortable) == 'DESC';
+        $method = $sort_desc ? 'moveToEnd' : 'moveToStart';
         $validationResult->model->{$method}();
         return response('', 204);
     }
@@ -146,7 +147,8 @@ class SortableController
     public function moveToEnd(NovaRequest $request)
     {
         $validationResult = $this->validateRequest($request);
-        $method = $request->resource()::getOrderByDirection($validationResult->sortable) !== 'DESC' ? 'moveToEnd' : 'moveToStart';
+        $sort_desc = $request->resource()::getOrderByDirection($validationResult->sortable) == 'DESC';
+        $method = $sort_desc ? 'moveToStart' : 'moveToEnd';
         $validationResult->model->{$method}();
         return response('', 204);
     }

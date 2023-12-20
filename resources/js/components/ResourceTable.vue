@@ -1,9 +1,9 @@
 <template>
-  <div class="relative overflow-hidden overflow-x-auto">
+  <div class="overflow-hidden overflow-x-auto relative">
     <table
       v-if="resources.length > 0"
       class="w-full divide-y divide-gray-100 dark:divide-gray-700"
-      data-testid="resource-table"
+      dusk="resource-table"
     >
       <ResourceTableHeader
         :resource-name="resourceName"
@@ -13,40 +13,42 @@
         :sortable="sortable"
         @order="requestOrderByChange"
         @reset-order-by="resetOrderBy"
+        :resource="{ ...(fakeResources[0] || {}) }"
       />
       <draggable
         tag="tbody"
-        item-key="id"
         v-model="fakeResources"
         handle=".handle"
         draggable="tr"
-        class="divide-y divide-gray-100 dark:divide-gray-700"
         @update="updateOrder"
+        class="divide-y divide-gray-100 dark:divide-gray-700"
       >
+        <!-- :key="`${resource.id.value}-items-${index}`" -->
         <ResourceTableRow
-          v-for="(resource, index) in resources"
+          v-for="(resource, index) in fakeResources"
           @actionExecuted="$emit('actionExecuted')"
-          :testId="`${resourceName}-items-${index}`"
-          :key="`${resource.id.value}-items-${index}`"
-          :delete-resource="deleteResource"
-          :restore-resource="restoreResource"
-          :resource="resource"
-          :resource-name="resourceName"
-          :relationship-type="relationshipType"
-          :via-relationship="viaRelationship"
-          :via-resource="viaResource"
-          :via-resource-id="viaResourceId"
-          :via-many-to-many="viaManyToMany"
-          :checked="selectedResources.indexOf(resource) > -1"
           :actions-are-available="actionsAreAvailable"
           :actions-endpoint="actionsEndpoint"
+          :checked="selectedResources.indexOf(resource) > -1"
+          :click-action="clickAction"
+          :delete-resource="deleteResource"
+          :key="`${resourceName}-items-${resource.id?.value || index}`"
+          :relationship-type="relationshipType"
+          :resource-name="resourceName"
+          :resource="resource"
+          :restore-resource="restoreResource"
+          :selected-resources="selectedResources"
           :should-show-checkboxes="shouldShowCheckboxes"
           :should-show-column-borders="shouldShowColumnBorders"
           :table-style="tableStyle"
+          :testId="`${resourceName}-items-${index}`"
           :update-selection-status="updateSelectionStatus"
-          :click-action="clickAction"
           @moveToStart="moveToStart(resource)"
           @moveToEnd="moveToEnd(resource)"
+          :via-many-to-many="viaManyToMany"
+          :via-relationship="viaRelationship"
+          :via-resource-id="viaResourceId"
+          :via-resource="viaResource"
         />
       </draggable>
     </table>
@@ -59,14 +61,7 @@ import { VueDraggableNext } from 'vue-draggable-next'
 import ReordersResources from '../mixins/ReordersResources'
 
 export default {
-  emits: [
-    'actionExecuted',
-    'updateOrder',
-    'delete',
-    'restore',
-    'order',
-    'reset-order-by',
-  ],
+  emits: ['actionExecuted', 'delete', 'restore', 'order', 'reset-order-by'],
 
   mixins: [InteractsWithResourceInformation, ReordersResources],
 
@@ -118,6 +113,7 @@ export default {
      */
     requestOrderByChange(field) {
       this.$emit('order', field)
+      Nova.$emit('resource-ordered-changed', field)
     },
 
     /**
@@ -125,6 +121,7 @@ export default {
      */
     resetOrderBy(field) {
       this.$emit('reset-order-by', field)
+      Nova.$emit('resource-ordered-reset', field)
     },
   },
 
@@ -165,3 +162,9 @@ export default {
   },
 }
 </script>
+
+<style>
+.flip-list-move {
+  transition: transform 0.25s;
+}
+</style>

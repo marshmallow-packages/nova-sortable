@@ -1,21 +1,22 @@
 <template>
   <tr
-    :data-pivot-id="resource['id'].pivotValue"
-    :dusk="resource['id'].value + '-row'"
+    :data-pivot-id="resource.id.pivotValue"
+    :dusk="`${resource.id.value}-row`"
     class="group"
     :class="{
       'divide-x divide-gray-100 dark:divide-gray-700': shouldShowColumnBorders,
     }"
-    @click.stop.prevent="navigateToDetail"
+    @click.stop.prevent="handleClick"
   >
     <!-- Resource Selection Checkbox -->
     <td
       v-if="shouldShowCheckboxes || canSeeReorderButtons"
       :class="{
+        'border-t border-gray-100 dark:border-gray-700 px-2': true,
         'py-2': !shouldShowTight,
         'cursor-pointer': resource.authorizedToView,
       }"
-      class="pl-5 pr-5 td-fit dark:bg-gray-800 group-hover:bg-gray-50 dark:group-hover:bg-gray-900"
+      class="td-fit pl-5 pr-5 dark:bg-gray-800 group-hover:bg-gray-50 dark:group-hover:bg-gray-900"
       @click.stop
     >
       <ReorderButtons
@@ -29,11 +30,10 @@
       >
         <Checkbox
           v-if="shouldShowCheckboxes"
+          @change="toggleSelection"
+          :model-value="checked"
+          :dusk="`${resource.id.value}-checkbox`"
           :aria-label="__('Select Resource :title', { title: resource.title })"
-          :checked="checked"
-          :data-testid="`${testId}-checkbox`"
-          :dusk="`${resource['id'].value}-checkbox`"
-          @input="toggleSelection"
         />
       </ReorderButtons>
     </td>
@@ -43,8 +43,8 @@
       v-for="(field, index) in resource.fields"
       :key="field.uniqueKey"
       :class="{
-        'px-6': index == 0 && !shouldShowCheckboxes,
-        'px-2': index != 0 || shouldShowCheckboxes,
+        'px-6': index === 0 && !shouldShowCheckboxes,
+        'px-2': index !== 0 || shouldShowCheckboxes,
         'py-2': !shouldShowTight,
         'whitespace-nowrap': !field.wrapping,
         'cursor-pointer': clickableRow,
@@ -67,7 +67,7 @@
         'py-2': !shouldShowTight,
         'cursor-pointer': resource.authorizedToView,
       }"
-      class="px-2 text-right align-middle td-fit dark:bg-gray-800 group-hover:bg-gray-50 dark:group-hover:bg-gray-900"
+      class="px-2 td-fit text-right align-middle dark:bg-gray-800 group-hover:bg-gray-50 dark:group-hover:bg-gray-900"
     >
       <div class="flex items-center justify-end space-x-0 text-gray-400">
         <InlineActionDropdown
@@ -85,69 +85,62 @@
         />
 
         <!-- View Resource Link -->
-        <Link
+        <Button
           v-if="authorizedToViewAnyResources"
-          :as="!resource.authorizedToView ? 'button' : 'a'"
-          :disabled="!resource.authorizedToView"
+          :as="resource.authorizedToView ? 'Link' : 'Button'"
           v-tooltip.click="__('View')"
           :aria-label="__('View')"
           :dusk="`${resource['id'].value}-view-button`"
-          :href="viewURL"
-          class="px-2 toolbar-button hover:text-primary-500 disabled:opacity-50 disabled:pointer-events-none"
-          @click.stop
-        >
-          <Icon type="eye" />
-        </Link>
+          @click.stop="navigateToDetailView"
+          icon="eye"
+          variant="action"
+          :class="
+            resource.authorizedToView
+              ? 'hover:text-primary-500 dark:hover:text-primary-500'
+              : null
+          "
+          :disabled="!resource.authorizedToView"
+        />
 
-        <!-- Edit Pivot Button -->
-        <Link
-          v-if="authorizedToUpdateAnyResources && viaManyToMany"
-          :as="!resource.authorizedToUpdate ? 'button' : 'a'"
+        <!-- Edit Button -->
+        <Button
+          v-if="authorizedToUpdateAnyResources"
+          :as="resource.authorizedToUpdate ? 'Link' : 'Button'"
+          v-tooltip.click="viaManyToMany ? __('Edit Attached') : __('Edit')"
+          :aria-label="viaManyToMany ? __('Edit Attached') : __('Edit')"
+          :dusk="
+            viaManyToMany
+              ? `${resource['id'].value}-edit-attached-button`
+              : `${resource['id'].value}-edit-button`
+          "
+          @click.stop="navigateToEditView"
+          icon="pencil-square"
+          variant="action"
+          :class="
+            resource.authorizedToUpdate
+              ? 'hover:text-primary-500 dark:hover:text-primary-500'
+              : null
+          "
           :disabled="!resource.authorizedToUpdate"
-          v-tooltip.click="__('Edit Attached')"
-          :aria-label="__('Edit Attached')"
-          :dusk="`${resource['id'].value}-edit-attached-button`"
-          :href="updateURL"
-          class="px-2 toolbar-button hover:text-primary-500 disabled:opacity-50 disabled:pointer-events-none"
-          @click.stop
-        >
-          <Icon type="pencil-alt" />
-        </Link>
-
-        <!-- Edit Resource Link -->
-        <Link
-          v-else-if="authorizedToUpdateAnyResources"
-          :as="!resource.authorizedToUpdate ? 'button' : 'a'"
-          :disabled="!resource.authorizedToUpdate"
-          v-tooltip.click="__('Edit')"
-          :aria-label="__('Edit')"
-          :dusk="`${resource['id'].value}-edit-button`"
-          :href="updateURL"
-          class="px-2 toolbar-button hover:text-primary-500 disabled:opacity-50 disabled:pointer-events-none"
-          @click.stop
-        >
-          <Icon type="pencil-alt" />
-        </Link>
+        />
 
         <!-- Delete Resource Link -->
-        <button
+        <Button
           v-if="
             authorizedToDeleteAnyResources &&
             (!resource.softDeleted || viaManyToMany)
           "
+          @click.stop="openDeleteModal"
           v-tooltip.click="__(viaManyToMany ? 'Detach' : 'Delete')"
           :aria-label="__(viaManyToMany ? 'Detach' : 'Delete')"
-          :data-testid="`${testId}-delete-button`"
+          :dusk="`${resource.id.value}-delete-button`"
+          icon="trash"
+          variant="action"
           :disabled="!resource.authorizedToDelete"
-          :dusk="`${resource['id'].value}-delete-button`"
-          class="px-2 toolbar-button hover:text-primary-500 disabled:opacity-50 disabled:pointer-events-none"
-          @click.stop="openDeleteModal"
-        >
-          <Icon type="trash" />
-        </button>
+        />
 
         <!-- Restore Resource Link -->
-        <button
+        <Button
           v-if="
             authorizedToRestoreAnyResources &&
             resource.softDeleted &&
@@ -156,12 +149,12 @@
           v-tooltip.click="__('Restore')"
           :aria-label="__('Restore')"
           :disabled="!resource.authorizedToRestore"
-          :dusk="`${resource['id'].value}-restore-button`"
-          class="px-2 toolbar-button hover:text-primary-500 disabled:opacity-50 disabled:pointer-events-none"
+          :dusk="`${resource.id.value}-restore-button`"
+          type="button"
           @click.stop="openRestoreModal"
-        >
-          <Icon type="refresh" />
-        </button>
+          icon="arrow-path"
+          variant="action"
+        />
 
         <DeleteResourceModal
           :mode="viaManyToMany ? 'detach' : 'delete'"
@@ -198,11 +191,18 @@
 
 <script>
 import filter from 'lodash/filter'
-import { Inertia } from '@inertiajs/inertia'
 import ReordersResources from '../mixins/ReordersResources'
+import { Inertia } from '@inertiajs/inertia'
 import { mapGetters } from 'vuex'
+import { Button, Checkbox, Icon } from 'laravel-nova-ui'
 
 export default {
+  components: {
+    Button,
+    Checkbox,
+    Icon,
+  },
+
   emits: ['actionExecuted'],
   mixins: [ReordersResources],
 
@@ -214,26 +214,27 @@ export default {
   ],
 
   props: [
-    'testId',
-    'deleteResource',
-    'restoreResource',
-    'resource',
-    'resourcesSelected',
-    'resourceName',
-    'relationshipType',
-    'viaRelationship',
-    'viaResource',
-    'viaResourceId',
-    'viaManyToMany',
-    'checked',
     'actionsAreAvailable',
     'actionsEndpoint',
+    'checked',
+    'clickAction',
+    'deleteResource',
+    'queryString',
+    'relationshipType',
+    'resource',
+    'resourceName',
+    'resourcesSelected',
+    'restoreResource',
+    'selectedResources',
     'shouldShowCheckboxes',
     'shouldShowColumnBorders',
     'tableStyle',
+    'testId',
     'updateSelectionStatus',
-    'queryString',
-    'clickAction',
+    'viaManyToMany',
+    'viaRelationship',
+    'viaResource',
+    'viaResourceId',
   ],
 
   data: () => ({
@@ -242,6 +243,10 @@ export default {
     restoreModalOpen: false,
     previewModalOpen: false,
   }),
+
+  beforeMount() {
+    this.isSelected = this.selectedResources.indexOf(this.resource) > -1
+  },
 
   mounted() {
     window.addEventListener('keydown', this.handleKeydown)
@@ -273,7 +278,7 @@ export default {
       }
     },
 
-    navigateToDetail(e) {
+    handleClick(e) {
       if (this.clickAction === 'edit') {
         return this.navigateToEditView(e)
       } else if (this.clickAction === 'select') {
@@ -295,7 +300,8 @@ export default {
       }
       this.commandPressed
         ? window.open(this.viewURL, '_blank')
-        : Inertia.visit(this.viewURL)
+        : this.$inertia.visit(this.viewURL) // use this instead of the Inertia.visit to avoid the following issue: https://github.com/outl1ne/nova-sortable/issues/128#issuecomment-1171264760
+      // : Inertia.visit(this.viewURL)
     },
 
     navigateToEditView(e) {
@@ -304,7 +310,8 @@ export default {
       }
       this.commandPressed
         ? window.open(this.updateURL, '_blank')
-        : Inertia.visit(this.updateURL)
+        : this.$inertia.visit(this.updateURL) // use this instead of the Inertia.visit to avoid the following issue: https://github.com/outl1ne/nova-sortable/issues/128#issuecomment-1171264760
+      // : Inertia.visit(this.updateURL)
     },
 
     navigateToPreviewView(e) {

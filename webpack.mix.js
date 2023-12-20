@@ -8,6 +8,7 @@ mix
   .js('resources/js/tool.js', 'js')
   .vue({ version: 3 })
   .nova('marshmallow/nova-sortable')
+  .postCss('resources/css/tool.css', 'css', [require('tailwindcss')])
   .alias({
     'laravel-nova': path.join(__dirname, 'vendor/laravel/nova/resources/js/mixins/packages.js'),
     '@': path.join(__dirname, 'resources/js/'),

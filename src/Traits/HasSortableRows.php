@@ -2,6 +2,7 @@
 
 namespace Marshmallow\NovaSortable\Traits;
 
+use Illuminate\Database\Eloquent\Builder;
 use Spatie\EloquentSortable\SortableTrait;
 use Laravel\Nova\Http\Requests\LensRequest;
 use Laravel\Nova\Http\Requests\NovaRequest;
@@ -9,6 +10,7 @@ use Laravel\Nova\Http\Requests\NovaRequest;
 trait HasSortableRows
 {
     protected static $_sortabilityCacheEnabled = true;
+    protected static $_hideArrows = false;
     protected static $sortabilityCache = [];
 
     public static function canSort(NovaRequest $request, $resource)
@@ -106,10 +108,14 @@ trait HasSortableRows
             'sort_on_belongs_to' => $sortability->sortable && $sortability->sortOnBelongsTo,
         ] : ['sort_not_allowed' => !($sortability->canSort ?? true)]);
 
+        $sortabilityData = array_merge($sortabilityData, [
+            'arrows_disabled' => self::hideArrows() ?? false,
+        ]);
+
         return array_merge(parent::serializeForIndex($request, $fields), $sortabilityData);
     }
 
-    public static function indexQuery(NovaRequest $request, $query)
+    public static function indexQuery(NovaRequest $request, $query): Builder
     {
         $sortability = static::getSortability($request);
 
@@ -160,7 +166,13 @@ trait HasSortableRows
         // If model does not have sortable configuration return the default.
         if (!isset($model->sortable)) return $defaultConfiguration;
 
-        return array_merge($defaultConfiguration, $model->sortable);
+        $array =  array_merge($defaultConfiguration, $model->sortable);
+
+        $array = array_merge($array, [
+            'arrows_disabled' => self::hideArrows() ?? false,
+        ]);
+
+        return $array;
     }
 
     /**
@@ -175,6 +187,18 @@ trait HasSortableRows
         return $order;
     }
 
+
+    public static function hideArrows()
+    {
+        if (isset(static::$hideArrows)) return static::$hideArrows;
+        if (!static::$_hideArrows) return false;
+        return true;
+    }
+
+    public static function disableArrows()
+    {
+        static::$_hideArrows = false;
+    }
 
     // ------------------------------
     // -- Cache helpers

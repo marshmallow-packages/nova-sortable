@@ -15,6 +15,11 @@ export default {
   beforeMount() {
     this.fakeResources = this.resources;
   },
+  watch: {
+    resources(newVal, oldVal) {
+      this.fakeResources = this.resources;
+    },
+  },
   methods: {
     async updateOrder(event) {
       this.reorderLoading = true;
@@ -29,6 +34,7 @@ export default {
           relationshipType: this.relationshipType,
           relatedResource: this.viaResource,
         });
+        await this.refreshResourcesList();
         Nova.success(this.__('novaSortable.reorderSuccessful'));
       } catch (e) {
         if (e && e.response && e.response.data && e.response.data.canNotReorder) {
@@ -46,14 +52,15 @@ export default {
     async moveToStart(resource) {
       this.reorderLoading = true;
       try {
-        await Nova.request().post(`/nova-vendor/nova-sortable/sort/${this.resourceName}/move-to-start`, {
+        let postData = {
           resourceId: resource.id.value,
           viaResource: this.viaResource,
           viaResourceId: this.viaResourceId,
           viaRelationship: this.viaRelationship,
           relationshipType: this.relationshipType,
           relatedResource: this.viaResource,
-        });
+        };
+        await Nova.request().post(`/nova-vendor/nova-sortable/sort/${this.resourceName}/move-to-start`, postData);
         await this.refreshResourcesList();
         Nova.success(this.__('novaSortable.moveToStartSuccessful'));
       } catch (e) {
@@ -65,14 +72,15 @@ export default {
     async moveToEnd(resource) {
       this.reorderLoading = true;
       try {
-        await Nova.request().post(`/nova-vendor/nova-sortable/sort/${this.resourceName}/move-to-end`, {
+        let postData = {
           resourceId: resource.id.value,
           viaResource: this.viaResource,
           viaResourceId: this.viaResourceId,
           viaRelationship: this.viaRelationship,
           relationshipType: this.relationshipType,
           relatedResource: this.viaResource,
-        });
+        };
+        await Nova.request().post(`/nova-vendor/nova-sortable/sort/${this.resourceName}/move-to-end`, postData);
         await this.refreshResourcesList();
         Nova.success(this.__('novaSortable.moveToEndSuccessful'));
       } catch (e) {
@@ -82,12 +90,7 @@ export default {
     },
 
     async refreshResourcesList() {
-      // ! Might break with new Laravel Nova versions
-      let parent = this.$parent;
-      while (parent && !parent.getResources) {
-        parent = parent.$parent;
-      }
-      if (parent && parent.getResources) await parent.getResources();
+      Nova.$emit('refresh-resources');
     },
   },
 };
