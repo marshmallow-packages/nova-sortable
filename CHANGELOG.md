@@ -55,7 +55,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Removed o1- prefix from gray colors. Allows package to use nova's color configuration.
+- Removed mm- prefix from gray colors. Allows package to use nova's color configuration.
 
 ### Added
 

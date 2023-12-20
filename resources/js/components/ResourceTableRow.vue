@@ -4,7 +4,7 @@
     :dusk="resource['id'].value + '-row'"
     class="group"
     :class="{
-      'o1-divide-x divide-gray-100 dark:divide-gray-700':
+      'mm-divide-x divide-gray-100 dark:divide-gray-700':
         shouldShowColumnBorders,
     }"
     @click.stop.prevent="navigateToDetail"
@@ -13,11 +13,11 @@
     <td
       v-if="shouldShowCheckboxes || canSeeReorderButtons"
       :class="{
-        'o1-py-2': !shouldShowTight,
-        'o1-border-t border-gray-100 dark:border-gray-700 o1-px-2': true,
-        'o1-cursor-pointer': resource.authorizedToView,
+        'mm-py-2': !shouldShowTight,
+        'mm-border-t border-gray-100 dark:border-gray-700 mm-px-2': true,
+        'mm-cursor-pointer': resource.authorizedToView,
       }"
-      class="td-fit o1-pl-5 o1-pr-5 dark:bg-gray-800 group-hover:bg-gray-50 dark:group-hover:bg-gray-900"
+      class="td-fit mm-pl-5 mm-pr-5 dark:bg-gray-800 group-hover:bg-gray-50 dark:group-hover:bg-gray-900"
       @click.stop
     >
       <ReorderButtons
@@ -45,11 +45,11 @@
       v-for="(field, index) in resource.fields"
       :key="field.uniqueKey"
       :class="{
-        'o1-px-6': index == 0 && !shouldShowCheckboxes,
-        'o1-px-2': index != 0 || shouldShowCheckboxes,
-        'o1-py-2': !shouldShowTight,
-        'o1-whitespace-nowrap': !field.wrapping,
-        'o1-cursor-pointer': clickableRow,
+        'mm-px-6': index == 0 && !shouldShowCheckboxes,
+        'mm-px-2': index != 0 || shouldShowCheckboxes,
+        'mm-py-2': !shouldShowTight,
+        'mm-whitespace-nowrap': !field.wrapping,
+        'mm-cursor-pointer': clickableRow,
       }"
       class="dark:bg-gray-800 group-hover:bg-gray-50 dark:group-hover:bg-gray-900"
     >
@@ -66,13 +66,13 @@
 
     <td
       :class="{
-        'o1-py-2': !shouldShowTight,
-        'o1-cursor-pointer': resource.authorizedToView,
+        'mm-py-2': !shouldShowTight,
+        'mm-cursor-pointer': resource.authorizedToView,
       }"
-      class="o1-px-2 td-fit o1-text-right o1-align-middle dark:bg-gray-800 group-hover:bg-gray-50 dark:group-hover:bg-gray-900"
+      class="mm-px-2 td-fit mm-text-right mm-align-middle dark:bg-gray-800 group-hover:bg-gray-50 dark:group-hover:bg-gray-900"
     >
       <div
-        class="o1-flex o1-items-center o1-justify-end o1-space-x-0 text-gray-400"
+        class="mm-flex mm-items-center mm-justify-end mm-space-x-0 text-gray-400"
       >
         <InlineActionDropdown
           v-if="shouldShowActionDropdown"
@@ -97,7 +97,7 @@
           :aria-label="__('View')"
           :dusk="`${resource['id'].value}-view-button`"
           :href="$url(`/resources/${resourceName}/${resource['id'].value}`)"
-          class="toolbar-button hover:o1-text-primary-500 o1-px-2 disabled:o1-opacity-50 disabled:o1-pointer-events-none"
+          class="toolbar-button hover:o1-text-primary-500 mm-px-2 disabled:o1-opacity-50 disabled:o1-pointer-events-none"
           @click.stop
         >
           <Icon type="eye" />
@@ -124,7 +124,7 @@
               }
             )
           "
-          class="toolbar-button hover:o1-text-primary-500 o1-px-2 disabled:o1-opacity-50 disabled:o1-pointer-events-none"
+          class="toolbar-button hover:o1-text-primary-500 mm-px-2 disabled:o1-opacity-50 disabled:o1-pointer-events-none"
           @click.stop
         >
           <Icon type="pencil-alt" />
@@ -145,7 +145,7 @@
               viaRelationship: viaRelationship,
             })
           "
-          class="toolbar-button hover:o1-text-primary-500 o1-px-2 disabled:o1-opacity-50 disabled:o1-pointer-events-none"
+          class="toolbar-button hover:o1-text-primary-500 mm-px-2 disabled:o1-opacity-50 disabled:o1-pointer-events-none"
           @click.stop
         >
           <Icon type="pencil-alt" />
@@ -162,7 +162,7 @@
           :data-testid="`${testId}-delete-button`"
           :disabled="!resource.authorizedToDelete"
           :dusk="`${resource['id'].value}-delete-button`"
-          class="toolbar-button hover:o1-text-primary-500 o1-px-2 disabled:o1-opacity-50 disabled:o1-pointer-events-none"
+          class="toolbar-button hover:o1-text-primary-500 mm-px-2 disabled:o1-opacity-50 disabled:o1-pointer-events-none"
           @click.stop="openDeleteModal"
         >
           <Icon type="trash" />
@@ -179,7 +179,7 @@
           :aria-label="__('Restore')"
           :disabled="!resource.authorizedToRestore"
           :dusk="`${resource['id'].value}-restore-button`"
-          class="toolbar-button hover:o1-text-primary-500 o1-px-2 disabled:o1-opacity-50 disabled:o1-pointer-events-none"
+          class="toolbar-button hover:o1-text-primary-500 mm-px-2 disabled:o1-opacity-50 disabled:o1-pointer-events-none"
           @click.stop="openRestoreModal"
         >
           <Icon type="refresh" />
@@ -199,7 +199,7 @@
         >
           <ModalHeader v-text="__('Restore Resource')" />
           <ModalContent>
-            <p class="o1-leading-normal">
+            <p class="mm-leading-normal">
               {{ __('Are you sure you want to restore this resource?') }}
             </p>
           </ModalContent>

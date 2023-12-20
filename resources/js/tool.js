@@ -7,10 +7,10 @@ const handleDarkMode = () => {
   const cls = document.documentElement.classList;
   const isDarkMode = cls.contains('dark');
 
-  if (isDarkMode && !cls.contains('o1-dark')) {
-    cls.add('o1-dark');
-  } else if (!isDarkMode && cls.contains('o1-dark')) {
-    cls.remove('o1-dark');
+  if (isDarkMode && !cls.contains('mm-dark')) {
+    cls.add('mm-dark');
+  } else if (!isDarkMode && cls.contains('mm-dark')) {
+    cls.remove('mm-dark');
   }
 };
 

@@ -1,7 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: ['./resources/**/*.{js,vue}'],
-  prefix: 'o1-',
+  prefix: 'mm-',
   corePlugins: { preflight: false },
   darkMode: 'class',
   safelist: [],
