@@ -10,6 +10,7 @@ use Laravel\Nova\Http\Requests\NovaRequest;
 trait HasSortableRows
 {
     protected static $_sortabilityCacheEnabled = true;
+    protected static $_hideArrows = false;
     protected static $sortabilityCache = [];
 
     public static function canSort(NovaRequest $request, $resource)
@@ -161,7 +162,13 @@ trait HasSortableRows
         // If model does not have sortable configuration return the default.
         if (!isset($model->sortable)) return $defaultConfiguration;
 
-        return array_merge($defaultConfiguration, $model->sortable);
+        $array =  array_merge($defaultConfiguration, $model->sortable);
+
+        $array = array_merge($array, [
+            'hide_arrows' => self::hideArrows() ?? false,
+        ]);
+
+        return $array;
     }
 
     /**
@@ -176,6 +183,18 @@ trait HasSortableRows
         return $order;
     }
 
+
+    public static function hideArrows()
+    {
+        if (isset(static::$hideArrows)) return static::$hideArrows;
+        if (!static::$_hideArrows) return false;
+        return true;
+    }
+
+    public static function disableArrows()
+    {
+        static::$_hideArrows = false;
+    }
 
     // ------------------------------
     // -- Cache helpers
