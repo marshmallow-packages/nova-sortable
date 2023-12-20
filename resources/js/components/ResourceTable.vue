@@ -21,7 +21,7 @@
         handle=".handle"
         draggable="tr"
         @update="updateOrder"
-        class="mm-divide-y mm-divide-gray-100 dark:o1-divide-gray-700"
+        class="divide-y divide-gray-100 dark:divide-gray-700"
       >
         <ResourceTableRow
           v-for="(resource, index) in fakeResources"
