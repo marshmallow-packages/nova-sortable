@@ -1,8 +1,15 @@
 <template>
   <div class="mm-flex mm-items-center">
     <slot></slot>
-    <div class="mm-flex mm-items-center mm-ml-4" v-tooltip="reorderDisabledTooltip" v-if="canSeeReorderButtons">
-      <div class="mm-flex mm-flex-col">
+    <div
+      class="mm-flex mm-items-center"
+      v-tooltip="reorderDisabledTooltip"
+      v-if="canSeeReorderButtons"
+      :class="{
+        'mm-ml-4': !arrowsDisabled,
+      }"
+    >
+      <div class="mm-flex mm-flex-col" v-if="!arrowsDisabled">
         <ChevronUpIcon
           @click.stop="!reorderDisabled && $emit('moveToStart')"
           :custom-class="{
@@ -74,6 +81,10 @@ export default {
   computed: {
     canSeeReorderButtons() {
       return canSortResource(this.resource, this.relationshipType);
+    },
+
+    arrowsDisabled() {
+      return this.resource.sortable.arrows_disabled;
     },
 
     // Returns reason string why reordering is disabled

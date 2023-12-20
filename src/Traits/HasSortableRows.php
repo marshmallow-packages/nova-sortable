@@ -108,6 +108,10 @@ trait HasSortableRows
             'sort_on_belongs_to' => $sortability->sortable && $sortability->sortOnBelongsTo,
         ] : ['sort_not_allowed' => !($sortability->canSort ?? true)]);
 
+        $sortabilityData = array_merge($sortabilityData, [
+            'arrows_disabled' => self::hideArrows() ?? false,
+        ]);
+
         return array_merge(parent::serializeForIndex($request, $fields), $sortabilityData);
     }
 
@@ -165,7 +169,7 @@ trait HasSortableRows
         $array =  array_merge($defaultConfiguration, $model->sortable);
 
         $array = array_merge($array, [
-            'hide_arrows' => self::hideArrows() ?? false,
+            'arrows_disabled' => self::hideArrows() ?? false,
         ]);
 
         return $array;
