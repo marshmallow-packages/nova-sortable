@@ -23,6 +23,7 @@
         @update="updateOrder"
         class="divide-y divide-gray-100 dark:divide-gray-700"
       >
+        <!-- :key="`${resource.id.value}-items-${index}`" -->
         <ResourceTableRow
           v-for="(resource, index) in fakeResources"
           @actionExecuted="$emit('actionExecuted')"
@@ -31,7 +32,7 @@
           :checked="selectedResources.indexOf(resource) > -1"
           :click-action="clickAction"
           :delete-resource="deleteResource"
-          :key="`${resource.id.value}-items-${index}`"
+          :key="`${resourceName}-items-${resource.id?.value || index}`"
           :relationship-type="relationshipType"
           :resource-name="resourceName"
           :resource="resource"
