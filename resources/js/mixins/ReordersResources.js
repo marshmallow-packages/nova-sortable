@@ -52,14 +52,15 @@ export default {
     async moveToStart(resource) {
       this.reorderLoading = true;
       try {
-        await Nova.request().post(`/nova-vendor/nova-sortable/sort/${this.resourceName}/move-to-start`, {
+        let postData = {
           resourceId: resource.id.value,
           viaResource: this.viaResource,
           viaResourceId: this.viaResourceId,
           viaRelationship: this.viaRelationship,
           relationshipType: this.relationshipType,
           relatedResource: this.viaResource,
-        });
+        };
+        await Nova.request().post(`/nova-vendor/nova-sortable/sort/${this.resourceName}/move-to-start`, postData);
         await this.refreshResourcesList();
         Nova.success(this.__('novaSortable.moveToStartSuccessful'));
       } catch (e) {
@@ -71,14 +72,15 @@ export default {
     async moveToEnd(resource) {
       this.reorderLoading = true;
       try {
-        await Nova.request().post(`/nova-vendor/nova-sortable/sort/${this.resourceName}/move-to-end`, {
+        let postData = {
           resourceId: resource.id.value,
           viaResource: this.viaResource,
           viaResourceId: this.viaResourceId,
           viaRelationship: this.viaRelationship,
           relationshipType: this.relationshipType,
           relatedResource: this.viaResource,
-        });
+        };
+        await Nova.request().post(`/nova-vendor/nova-sortable/sort/${this.resourceName}/move-to-end`, postData);
         await this.refreshResourcesList();
         Nova.success(this.__('novaSortable.moveToEndSuccessful'));
       } catch (e) {
