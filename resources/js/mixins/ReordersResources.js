@@ -88,12 +88,7 @@ export default {
     },
 
     async refreshResourcesList() {
-      // ! Might break with new Laravel Nova versions
-      let parent = this.$parent;
-      while (parent && !parent.getResources) {
-        parent = parent.$parent;
-      }
-      if (parent && parent.getResources) await parent.getResources();
+      Nova.$emit('refresh-resources');
     },
   },
 };
