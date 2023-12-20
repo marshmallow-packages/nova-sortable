@@ -124,7 +124,7 @@ export default {
      * Determine whether this column is being sorted
      */
     isSorted() {
-      return this.sortColumn == this.uriKey && this.hasDirection;
+      return this.sortColumn == this.uriKey || this.hasDirection;
     },
 
     /**
