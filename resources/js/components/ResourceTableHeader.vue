@@ -3,27 +3,26 @@
     <tr>
       <!-- Select Checkbox -->
       <th
-        class="td-fit uppercase text-xxs text-gray-500 tracking-wide pl-5 pr-2 py-2"
+        class="td-fit o1-uppercase text-xxs text-gray-500 o1-tracking-wide o1-pl-5 o1-pr-2 o1-py-2"
         :class="{
-          'border-r border-gray-200 dark:border-gray-600': shouldShowColumnBorders,
+          'o1-border-r border-gray-200 dark:border-gray-600': shouldShowColumnBorders,
         }"
         v-if="shouldShowCheckboxes || canSeeReorderButtons"
       >
-        <span v-if="shouldShowCheckboxes" class="sr-only">{{ __('Selected Resources') }}</span>
+        <span v-if="shouldShowCheckboxes" class="o1-sr-only">{{ __('Selected Resources') }}</span>
       </th>
 
-      <!-- Field Names -->
       <th
         v-for="(field, index) in fields"
         :key="field.uniqueKey"
         :class="{
           [`text-${field.textAlign}`]: true,
-          'border-r border-gray-200 dark:border-gray-600': shouldShowColumnBorders,
-          'px-6': index == 0 && !shouldShowCheckboxes && !canSeeReorderButtons,
-          'px-2': index != 0 || shouldShowCheckboxes || canSeeReorderButtons,
-          'whitespace-nowrap': !field.wrapping,
+          'o1-border-r border-gray-200 dark:border-gray-600': shouldShowColumnBorders,
+          'o1-px-6': index == 0 && !shouldShowCheckboxes && !canSeeReorderButtons,
+          'o1-px-2': index != 0 || shouldShowCheckboxes || canSeeReorderButtons,
+          'o1-whitespace-nowrap': !field.wrapping,
         }"
-        class="uppercase text-gray-500 text-xxs tracking-wide py-2"
+        class="o1-uppercase text-gray-500 text-xxs o1-tracking-wide o1-py-2"
       >
         <SortableIcon
           @sort="requestOrderByChange(field)"

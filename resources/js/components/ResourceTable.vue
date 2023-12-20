@@ -3,7 +3,7 @@
     <table
       v-if="resources.length > 0"
       class="w-full divide-y divide-gray-100 dark:divide-gray-700"
-      dusk="resource-table"
+      data-testid="resource-table"
     >
       <ResourceTableHeader
         :resource-name="resourceName"
@@ -21,13 +21,13 @@
         handle=".handle"
         draggable="tr"
         @update="updateOrder"
-        class="divide-y divide-gray-100 dark:divide-gray-700"
+        class="o1-divide-y o1-divide-gray-100 dark:o1-divide-gray-700"
       >
         <ResourceTableRow
           v-for="(resource, index) in fakeResources"
           @actionExecuted="$emit('actionExecuted')"
           :testId="`${resourceName}-items-${index}`"
-          :key="`${resourceName}-items-${index}-${resource.id.value}`"
+          :key="`${resourceName}-items-${resource.id?.value || index}`"
           :delete-resource="deleteResource"
           :restore-resource="restoreResource"
           :resource="resource"

@@ -12,3 +12,4 @@ mix
     'laravel-nova': path.join(__dirname, 'vendor/laravel/nova/resources/js/mixins/packages.js'),
     '@': path.join(__dirname, 'resources/js/'),
   });
+  .postCss('resources/css/tool.css', 'css', [require('tailwindcss')])
