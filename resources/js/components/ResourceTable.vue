@@ -113,6 +113,7 @@ export default {
      */
     requestOrderByChange(field) {
       this.$emit('order', field)
+      Nova.$emit('resource-ordered-changed', field)
     },
 
     /**
@@ -120,6 +121,7 @@ export default {
      */
     resetOrderBy(field) {
       this.$emit('reset-order-by', field)
+      Nova.$emit('resource-ordered-reset', field)
     },
   },
 

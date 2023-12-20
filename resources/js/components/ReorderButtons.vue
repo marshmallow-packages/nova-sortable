@@ -48,6 +48,29 @@ export default {
 
   inject: ['orderByParameter', 'orderByDirectionParameter'],
 
+  mounted() {
+    Nova.$on('resource-ordered-reset', field => this.resetOrderBy(field));
+    Nova.$on('resource-ordered-changed', field => this.changedOrderBy(field));
+  },
+
+  methods: {
+    changedOrderBy(field) {
+      this.sortableUriKey = field.sortableUriKey;
+    },
+
+    /**
+     * Reset the order by to its default ordered state
+     */
+    resetOrderBy(field) {
+      this.sortableUriKey = field.sortableUriKey;
+
+      this.updateQueryString({
+        [this.orderByParameter]: null,
+        [this.orderByDirectionParameter]: null,
+      });
+    },
+  },
+
   computed: {
     canSeeReorderButtons() {
       return canSortResource(this.resource, this.relationshipType);
@@ -67,7 +90,7 @@ export default {
     },
 
     uriKey() {
-      return this.routeParameters[this.sortKey];
+      return this.sortableUriKey ?? this.routeParameters[this.sortKey];
     },
 
     /**
