@@ -4,20 +4,19 @@
     :dusk="resource['id'].value + '-row'"
     class="group"
     :class="{
-      'mm-divide-x divide-gray-100 dark:divide-gray-700':
-        shouldShowColumnBorders,
+      'divide-x divide-gray-100 dark:divide-gray-700': shouldShowColumnBorders,
     }"
-    @click.stop.prevent="navigateToDetail"
+    @click.stop.prevent="handleClick"
   >
     <!-- Resource Selection Checkbox -->
     <td
       v-if="shouldShowCheckboxes || canSeeReorderButtons"
       :class="{
-        'mm-py-2': !shouldShowTight,
         'mm-border-t border-gray-100 dark:border-gray-700 mm-px-2': true,
-        'mm-cursor-pointer': resource.authorizedToView,
+        'py-2': !shouldShowTight,
+        'cursor-pointer': resource.authorizedToView,
       }"
-      class="td-fit mm-pl-5 mm-pr-5 dark:bg-gray-800 group-hover:bg-gray-50 dark:group-hover:bg-gray-900"
+      class="td-fit pl-5 pr-5 dark:bg-gray-800 group-hover:bg-gray-50 dark:group-hover:bg-gray-900"
       @click.stop
     >
       <ReorderButtons
@@ -45,11 +44,11 @@
       v-for="(field, index) in resource.fields"
       :key="field.uniqueKey"
       :class="{
-        'mm-px-6': index == 0 && !shouldShowCheckboxes,
-        'mm-px-2': index != 0 || shouldShowCheckboxes,
-        'mm-py-2': !shouldShowTight,
-        'mm-whitespace-nowrap': !field.wrapping,
-        'mm-cursor-pointer': clickableRow,
+        'px-6': index === 0 && !shouldShowCheckboxes,
+        'px-2': index !== 0 || shouldShowCheckboxes,
+        'py-2': !shouldShowTight,
+        'whitespace-nowrap': !field.wrapping,
+        'cursor-pointer': clickableRow,
       }"
       class="dark:bg-gray-800 group-hover:bg-gray-50 dark:group-hover:bg-gray-900"
     >
@@ -66,14 +65,12 @@
 
     <td
       :class="{
-        'mm-py-2': !shouldShowTight,
-        'mm-cursor-pointer': resource.authorizedToView,
+        'py-2': !shouldShowTight,
+        'cursor-pointer': resource.authorizedToView,
       }"
-      class="mm-px-2 td-fit mm-text-right mm-align-middle dark:bg-gray-800 group-hover:bg-gray-50 dark:group-hover:bg-gray-900"
+      class="px-2 td-fit text-right align-middle dark:bg-gray-800 group-hover:bg-gray-50 dark:group-hover:bg-gray-900"
     >
-      <div
-        class="mm-flex mm-items-center mm-justify-end mm-space-x-0 text-gray-400"
-      >
+      <div class="flex items-center justify-end space-x-0 text-gray-400">
         <InlineActionDropdown
           v-if="shouldShowActionDropdown"
           :actions="availableActions"
@@ -199,7 +196,7 @@
         >
           <ModalHeader v-text="__('Restore Resource')" />
           <ModalContent>
-            <p class="mm-leading-normal">
+            <p class="leading-normal">
               {{ __('Are you sure you want to restore this resource?') }}
             </p>
           </ModalContent>
@@ -221,9 +218,17 @@
 <script>
 import filter from 'lodash/filter'
 import ReordersResources from '../mixins/ReordersResources'
+import { Inertia } from '@inertiajs/inertia'
 import { mapGetters } from 'vuex'
+import { Button, Checkbox, Icon } from 'laravel-nova-ui'
 
 export default {
+  components: {
+    Button,
+    Checkbox,
+    Icon,
+  },
+
   emits: ['actionExecuted'],
   mixins: [ReordersResources],
 
@@ -294,7 +299,7 @@ export default {
       }
     },
 
-    navigateToDetail(e) {
+    handleClick(e) {
       if (this.clickAction === 'edit') {
         return this.navigateToEditView(e)
       } else if (this.clickAction === 'select') {
@@ -374,6 +379,16 @@ export default {
     ...mapGetters(['currentUser']),
 
     updateURL() {
+      if (this.viaManyToMany) {
+        return this.$url(
+          `/resources/${this.viaResource}/${this.viaResourceId}/edit-attached/${this.resourceName}/${this.resource.id.value}`,
+          {
+            viaRelationship: this.viaRelationship,
+            viaPivotId: this.resource.id.pivotValue,
+          }
+        )
+      }
+
       return this.$url(
         `/resources/${this.resourceName}/${this.resource.id.value}/edit`,
         {
@@ -417,9 +432,11 @@ export default {
     shouldShowActionDropdown() {
       return this.availableActions.length > 0 || this.userHasAnyOptions
     },
+
     shouldShowPreviewLink() {
       return this.resource.authorizedToView && this.resource.previewHasFields
     },
+
     userHasAnyOptions() {
       return (
         this.resource.authorizedToReplicate ||
@@ -427,6 +444,7 @@ export default {
         this.canBeImpersonated
       )
     },
+
     canBeImpersonated() {
       return (
         this.currentUser.canImpersonate && this.resource.authorizedToImpersonate
