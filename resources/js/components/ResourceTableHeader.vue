@@ -3,13 +3,13 @@
     <tr>
       <!-- Select Checkbox -->
       <th
-        class="td-fit uppercase text-xxs text-gray-500 tracking-wide pl-5 pr-2 py-2"
+        class="w-[1%] white-space-nowrap uppercase text-xxs text-gray-500 tracking-wide pl-5 pr-2 py-2"
         :class="{
           'border-r border-gray-200 dark:border-gray-600': shouldShowColumnBorders,
         }"
         v-if="shouldShowCheckboxes || canSeeReorderButtons"
       >
-        <span v-if="shouldShowCheckboxes" class="sr-only">{{ __('Selected Resources') }}</span>
+        <span class="sr-only">{{ __('Selected Resources') }}</span>
       </th>
 
       <!-- Field Names -->
@@ -23,7 +23,7 @@
           'px-2': index != 0 || shouldShowCheckboxes || canSeeReorderButtons,
           'whitespace-nowrap': !field.wrapping,
         }"
-        class="mm-uppercase text-gray-500 text-xxs mm-tracking-wide mm-py-2"
+        class="py-2 tracking-wide text-gray-500 uppercase text-xxs"
       >
         <SortableIcon
           @sort="requestOrderByChange(field)"
@@ -39,7 +39,7 @@
       </th>
 
       <!-- View, Edit, and Delete -->
-      <th class="uppercase text-xxs tracking-wide px-2 py-2">
+      <th class="px-2 py-2 tracking-wide uppercase text-xxs">
         <span class="sr-only">{{ __('Controls') }}</span>
       </th>
     </tr>
@@ -57,7 +57,6 @@ export default {
   emits: ['order', 'reset-order-by'],
 
   props: {
-    resource: Object | null,
     resourceName: String,
     shouldShowColumnBorders: Boolean,
     shouldShowCheckboxes: Boolean,

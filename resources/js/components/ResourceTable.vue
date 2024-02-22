@@ -1,5 +1,5 @@
 <template>
-  <div class="overflow-hidden overflow-x-auto relative">
+  <div class="relative overflow-hidden overflow-x-auto">
     <table
       v-if="resources.length > 0"
       class="w-full divide-y divide-gray-100 dark:divide-gray-700"
@@ -13,7 +13,6 @@
         :sortable="sortable"
         @order="requestOrderByChange"
         @reset-order-by="resetOrderBy"
-        :resource="{ ...(fakeResources[0] || {}) }"
       />
       <draggable
         tag="tbody"
