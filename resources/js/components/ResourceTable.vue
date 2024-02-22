@@ -31,7 +31,7 @@
           :checked="selectedResources.indexOf(resource) > -1"
           :click-action="clickAction"
           :delete-resource="deleteResource"
-          :key="`${resourceName}-items-${resource.id?.value || index}`"
+          :key="`${resource.id.value}-items-${index}`"
           :relationship-type="relationshipType"
           :resource-name="resourceName"
           :resource="resource"

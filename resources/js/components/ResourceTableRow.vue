@@ -12,7 +12,6 @@
     <td
       v-if="shouldShowCheckboxes || canSeeReorderButtons"
       :class="{
-        'border-t border-gray-100 dark:border-gray-700 px-2': true,
         'py-2': !shouldShowTight,
         'cursor-pointer': resource.authorizedToView,
       }"
