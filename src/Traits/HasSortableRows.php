@@ -36,7 +36,7 @@ trait HasSortableRows
 
         if ($request instanceof LensRequest) return null;
 
-        $model = $resource->resource ?? $resource ?? null;
+        $model = $resource->resource ?? $resource;
         if (!$model || !self::canSort($request, $model)) {
             return (static::$sortabilityCache[static::class] = (object)['canSort' => false]);
         }
