@@ -20,8 +20,8 @@ trait HasSortableRows
 
     public static function getSortability(NovaRequest $request, $resource = null)
     {
-        if (static::sortableCacheEnabled() && !empty(static::$sortabilityCache[static::class])) {
-            return static::$sortabilityCache[static::class];
+        if (self::sortableCacheEnabled() && !empty(self::$sortabilityCache[static::class])) {
+            return self::$sortabilityCache[static::class];
         }
 
         $model = null;
@@ -38,7 +38,7 @@ trait HasSortableRows
 
         $model = $resource->resource ?? $resource;
         if (!$model || !self::canSort($request, $model)) {
-            return (static::$sortabilityCache[static::class] = (object)['canSort' => false]);
+            return (self::$sortabilityCache[static::class] = (object)['canSort' => false]);
         }
 
         $sortable = self::getSortabilityConfiguration($model);
@@ -59,7 +59,7 @@ trait HasSortableRows
             }
 
             if (!$model || !self::canSort($request, $model)) {
-                return (static::$sortabilityCache[static::class] = (object)['canSort' => false]);
+                return (self::$sortabilityCache[static::class] = (object)['canSort' => false]);
             }
         }
 
@@ -84,7 +84,7 @@ trait HasSortableRows
             }
         }
 
-        return (static::$sortabilityCache[static::class] = (object)[
+        return (self::$sortabilityCache[static::class] = (object)[
             'model' => $model,
             'sortable' => $sortable,
             'sortOnBelongsTo' => $sortOnBelongsTo,
@@ -191,13 +191,13 @@ trait HasSortableRows
     public static function hideArrows()
     {
         if (isset(static::$hideArrows)) return static::$hideArrows;
-        if (!static::$_hideArrows) return false;
+        if (!self::$_hideArrows) return false;
         return true;
     }
 
     public static function disableArrows()
     {
-        static::$_hideArrows = false;
+        self::$_hideArrows = false;
     }
 
     // ------------------------------
@@ -206,13 +206,13 @@ trait HasSortableRows
 
     public static function sortableCacheEnabled()
     {
-        if (!static::$_sortabilityCacheEnabled) return false;
+        if (!self::$_sortabilityCacheEnabled) return false;
         if (isset(static::$sortableCacheEnabled)) return static::$sortableCacheEnabled;
         return true;
     }
 
     public static function disableSortabilityCache()
     {
-        static::$_sortabilityCacheEnabled = false;
+        self::$_sortabilityCacheEnabled = false;
     }
 }
