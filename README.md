@@ -13,7 +13,8 @@ Uses Spatie's [eloquent-sortable](https://github.com/spatie/eloquent-sortable) u
 ## Requirements
 
 - `php: >=8.0`
-- `laravel/nova: ^4.0|^5.0`
+- `laravel/nova: ^4.24.0|^5.0`
+- `spatie/eloquent-sortable: ^3.10.0|^4.0`
 
 ## Features
 
@@ -22,10 +23,6 @@ Uses Spatie's [eloquent-sortable](https://github.com/spatie/eloquent-sortable) u
 - Move to start and end arrows (makes item first/last)
 - Everything from [eloquent-sortable](https://github.com/spatie/eloquent-sortable)
 - Localization
-
-## Screenshots
-
-![Sortable](./docs/sortable.gif)
 
 ## Installation
 
@@ -144,23 +141,41 @@ class SomeModel extends Eloquent implements Sortable
 }
 ```
 
-### Ignoring policies
+### Hiding the move-to-start/end arrows
 
-If you have a resource that has `authorizedToUpdate` false, but you want the user to still be able to sort it, you can use the `ignore_policies` flag like so:
+By default each sortable row shows arrows to move an item to the start or end of the list. You can hide these arrows on a resource by setting the `$hideArrows` property on the resource that uses `HasSortableRows`:
 
 ```php
-class SomeModel extends Eloquent implements Sortable
+class Artist extends Resource
 {
-  use SortableTrait;
+    use HasSortableRows;
 
-  public $sortable = [
-    'order_column_name' => 'sort_order',
-    'sort_when_creating' => true,
-    'ignore_policies' => true,
-  ];
-
-  ...
+    public static $hideArrows = true;
 }
+```
+
+### Restricting sorting to specific relationships
+
+You can restrict where a model is sortable using the `only_sort_on` and `dont_sort_on` keys in the `$sortable` array. The value is the `viaResource` key of the parent resource.
+
+Use `only_sort_on` to allow sorting **only** when viewed through a specific relationship:
+
+```php
+public $sortable = [
+  'order_column_name' => 'sort_order',
+  'sort_when_creating' => true,
+  'only_sort_on' => 'albums',
+];
+```
+
+Use `dont_sort_on` to disable sorting on one or more relationships (accepts a string or an array):
+
+```php
+public $sortable = [
+  'order_column_name' => 'sort_order',
+  'sort_when_creating' => true,
+  'dont_sort_on' => ['albums', 'playlists'],
+];
 ```
 
 ## Sorting on HasMany relationship
@@ -193,9 +208,20 @@ return [
 
 ## Sorting on ManyToMany relationships
 
-Sorting on BelongsToMany and MorphToMany relationships is available, but requires special steps.
+Sorting on `BelongsToMany` and `MorphToMany` relationships is available through the dedicated `HasSortableManyToManyRows` trait, which disables sorting on the index view and sorts the records on the pivot table instead.
 
-See the documentation here: [Sorting ManyToMany relationships (w/ pivot table)](docs/sorting/many-to-many.md).
+```php
+use Marshmallow\NovaSortable\Traits\HasSortableManyToManyRows;
+
+class MyResource extends Resource
+{
+  use HasSortableManyToManyRows;
+
+  ...
+}
+```
+
+The order is stored on the pivot table, so make sure the pivot has a sort order column and that the relationship is defined with `->withPivot(...)` and ordered by that column.
 
 ## Localization
 
@@ -226,9 +252,15 @@ public static function indexQuery(NovaRequest $request, $query)
 }
 ```
 
+## Security
+
+If you discover any security related issues, please email security@marshmallow.dev instead of using the issue tracker.
+
 ## Credits
 
-- [Tarvo Reinpalu](https://github.com/Tarpsvo)
+- [Marshmallow](https://github.com/marshmallow-packages)
+- [Tarvo Reinpalu](https://github.com/Tarpsvo) (original author of [outl1ne/nova-sortable](https://github.com/outl1ne/nova-sortable))
+- [All Contributors](https://github.com/marshmallow-packages/nova-sortable/contributors)
 
 ## License
 
